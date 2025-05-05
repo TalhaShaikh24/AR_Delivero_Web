@@ -1,0 +1,18 @@
+{
+  "/favicon.ico/route": "/favicon.ico",
+  "/_not-found/page": "/_not-found",
+  "/blog/[slug]/page": "/blog/[slug]",
+  "/blog/page": "/blog",
+  "/categories/[category]/page": "/categories/[category]",
+  "/categories/page": "/categories",
+  "/checkout/confirmation/page": "/checkout/confirmation",
+  "/checkout/page": "/checkout",
+  "/delivery/page": "/delivery",
+  "/help/page": "/help",
+  "/menu/[id]/page": "/menu/[id]",
+  "/page": "/",
+  "/pickup/page": "/pickup",
+  "/restaurants/[slug]/page": "/restaurants/[slug]",
+  "/offers/page": "/offers",
+  "/restaurants/page": "/restaurants"
+}
