@@ -15,8 +15,8 @@ export default function Header() {
         {/* Logo Section */}
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-white rounded-full p-1.5 shadow-sm transition-transform group-hover:scale-105">
-              <Image src="/icons/logo.svg" alt="AR Delivero Logo" width={28} height={28} className="text-[#328bb8]" />
+            <div className=" p-1.5 shadow-sm transition-transform group-hover:scale-105">
+              <Image src="../../assets/logo.png" alt="AR Delivero Logo" width={70} height={70} className="text-[#328bb8]" />
             </div>
             <span className="text-xl font-bold tracking-tight">AR Delivero</span>
           </Link>

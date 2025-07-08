@@ -1,194 +1,94 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
 import Header from "@/components/header"
 import SearchBar from "@/components/search-bar"
 import Footer from "@/components/footer"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Minus, Plus, ShoppingBag } from "lucide-react"
+import { Minus, Plus, ShoppingBag, Clock, Utensils } from "lucide-react"
 import { useCart } from "@/context/cart-context"
-import { useRouter } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Skeleton } from "@/components/ui/skeleton"
+import { MenuService, type MenuItem } from "@/services/menu-service"
+import { API_BASE_URL } from "@/lib/api"
 
-// Mock data - would normally come from an API
-const menuItems = {
-  item1: {
-    id: "item1",
-    name: "Delicious Burger",
-    description:
-      "A juicy beef patty topped with cheese, lettuce, tomato, and our special sauce, served on a toasted brioche bun.",
-    price: 12.99,
-    image: "/placeholder.svg?height=400&width=600",
-    restaurant: "Burger Haven",
-    options: [
-      {
-        name: "Size",
-        required: true,
-        choices: [
-          { id: "regular", name: "Regular", price: 0 },
-          { id: "large", name: "Large", price: 2.5 },
-        ],
-      },
-      {
-        name: "Add-ons",
-        required: false,
-        choices: [
-          { id: "extra-cheese", name: "Extra Cheese", price: 1.5 },
-          { id: "bacon", name: "Bacon", price: 2 },
-          { id: "avocado", name: "Avocado", price: 1.5 },
-        ],
-      },
-    ],
-    relatedItems: ["item2", "item3", "item4"],
-  },
-  item2: {
-    id: "item2",
-    name: "Veggie Pizza",
-    description:
-      "Fresh vegetables including bell peppers, onions, mushrooms, and olives on our signature tomato sauce and mozzarella cheese.",
-    price: 14.99,
-    image: "/placeholder.svg?height=400&width=600",
-    restaurant: "Pizza Palace",
-    options: [
-      {
-        name: "Size",
-        required: true,
-        choices: [
-          { id: "medium", name: "Medium", price: 0 },
-          { id: "large", name: "Large", price: 3 },
-        ],
-      },
-      {
-        name: "Crust",
-        required: true,
-        choices: [
-          { id: "thin", name: "Thin Crust", price: 0 },
-          { id: "thick", name: "Thick Crust", price: 1 },
-          { id: "stuffed", name: "Stuffed Crust", price: 2.5 },
-        ],
-      },
-    ],
-    relatedItems: ["item1", "item3", "item5"],
-  },
-  item3: {
-    id: "item3",
-    name: "Chicken Biryani",
-    description:
-      "Fragrant basmati rice cooked with tender chicken pieces, aromatic spices, and herbs. Served with raita.",
-    price: 16.99,
-    image: "/placeholder.svg?height=400&width=600",
-    restaurant: "Spice Garden",
-    options: [
-      {
-        name: "Spice Level",
-        required: true,
-        choices: [
-          { id: "mild", name: "Mild", price: 0 },
-          { id: "medium", name: "Medium", price: 0 },
-          { id: "hot", name: "Hot", price: 0 },
-        ],
-      },
-      {
-        name: "Add-ons",
-        required: false,
-        choices: [
-          { id: "extra-raita", name: "Extra Raita", price: 1 },
-          { id: "naan", name: "Naan Bread", price: 2.5 },
-        ],
-      },
-    ],
-    relatedItems: ["item1", "item2", "item6"],
-  },
-  item4: {
-    id: "item4",
-    name: "Pasta Carbonara",
-    description: "Classic Italian pasta with creamy sauce, pancetta, eggs, and parmesan cheese.",
-    price: 13.99,
-    image: "/placeholder.svg?height=400&width=600",
-    restaurant: "Italian Delight",
-    options: [
-      {
-        name: "Pasta Type",
-        required: true,
-        choices: [
-          { id: "spaghetti", name: "Spaghetti", price: 0 },
-          { id: "fettuccine", name: "Fettuccine", price: 0 },
-          { id: "penne", name: "Penne", price: 0 },
-        ],
-      },
-    ],
-    relatedItems: ["item1", "item5", "item6"],
-  },
-  item5: {
-    id: "item5",
-    name: "Sushi Platter",
-    description:
-      "Assortment of fresh sushi including nigiri, maki, and sashimi. Served with wasabi, ginger, and soy sauce.",
-    price: 22.99,
-    image: "/placeholder.svg?height=400&width=600",
-    restaurant: "Asian Fusion",
-    options: [
-      {
-        name: "Size",
-        required: true,
-        choices: [
-          { id: "small", name: "Small (12 pcs)", price: 0 },
-          { id: "medium", name: "Medium (18 pcs)", price: 8 },
-          { id: "large", name: "Large (24 pcs)", price: 15 },
-        ],
-      },
-    ],
-    relatedItems: ["item2", "item3", "item6"],
-  },
-  item6: {
-    id: "item6",
-    name: "Caesar Salad",
-    description: "Crisp romaine lettuce with Caesar dressing, croutons, and shaved parmesan cheese.",
-    price: 9.99,
-    image: "/placeholder.svg?height=400&width=600",
-    restaurant: "Green Eats",
-    options: [
-      {
-        name: "Protein",
-        required: false,
-        choices: [
-          { id: "chicken", name: "Add Grilled Chicken", price: 3 },
-          { id: "shrimp", name: "Add Grilled Shrimp", price: 4 },
-          { id: "salmon", name: "Add Grilled Salmon", price: 5 },
-        ],
-      },
-      {
-        name: "Dressing",
-        required: true,
-        choices: [
-          { id: "regular", name: "Regular", price: 0 },
-          { id: "light", name: "Light", price: 0 },
-          { id: "side", name: "On the Side", price: 0 },
-        ],
-      },
-    ],
-    relatedItems: ["item1", "item2", "item4"],
-  },
-}
 
-export default function MenuItemPage({ params }: { params: { id: string } }) {
+export default function MenuItemPage() {
   const router = useRouter()
+  const params = useParams()
+  const menuId = params.id as string
   const { addItem, toggleCart } = useCart()
   const [quantity, setQuantity] = useState(1)
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, any>>({})
+  const [menuItem, setMenuItem] = useState<MenuItem | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [relatedItems, setRelatedItems] = useState<MenuItem[]>([])
 
-  // Get the menu item based on the ID from the URL
-  const item = menuItems[params.id]
+  useEffect(() => {
+    const fetchMenuItem = async () => {
+      try {
+        setLoading(true)
+        const item = await MenuService.getMenuById(menuId)
+        debugger;
+        setMenuItem(item)
 
-  if (!item) {
+        // Fetch related items (same category)
+        if (item && item.categoryId) {
+          const related = await MenuService.getRelatedMenuItems(item.categoryId, item._id)
+          setRelatedItems(related)
+        }
+
+        setLoading(false)
+      } catch (error) {
+        console.error("Error fetching menu item:", error)
+        setLoading(false)
+      }
+    }
+
+    if (menuId) {
+      fetchMenuItem()
+    }
+  }, [menuId])
+
+  const handleAddToCart = () => {
+    if (!menuItem) return
+
+    // Add item to cart
+    addItem({
+      id: menuItem._id,
+      name: menuItem.menuName,
+      price: menuItem.sellPrice,
+      quantity,
+      image: getImageUrl(menuItem.images[0]),
+      restaurant: menuItem.restaurantId,
+    })
+
+    // Open cart
+    toggleCart()
+  }
+
+  if (loading) {
     return (
       <div className="flex flex-col min-h-screen">
         <Header />
         <SearchBar />
         <main className="flex-1 py-8">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-2xl font-bold mb-4">Item not found</h1>
-            <Button onClick={() => router.push("/")}>Back to Home</Button>
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="md:w-1/2">
+                <Skeleton className="h-[400px] w-full rounded-lg" />
+              </div>
+              <div className="md:w-1/2">
+                <Skeleton className="h-10 w-3/4 mb-2" />
+                <Skeleton className="h-6 w-1/2 mb-4" />
+                <Skeleton className="h-24 w-full mb-6" />
+                <Skeleton className="h-8 w-1/4 mb-8" />
+                <Skeleton className="h-10 w-full mb-4" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            </div>
           </div>
         </main>
         <Footer />
@@ -196,183 +96,229 @@ export default function MenuItemPage({ params }: { params: { id: string } }) {
     )
   }
 
-  // Calculate additional price from selected options
-  const calculateAdditionalPrice = () => {
-    let additionalPrice = 0
-    Object.keys(selectedOptions).forEach((optionGroup) => {
-      const selectedChoice = selectedOptions[optionGroup]
-      if (selectedChoice) {
-        const option = item.options.find((opt) => opt.name === optionGroup)
-        if (option) {
-          const choice = option.choices.find((c) => c.id === selectedChoice)
-          if (choice) {
-            additionalPrice += choice.price
-          }
-        }
-      }
-    })
-    return additionalPrice
+  if (!menuItem) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <SearchBar />
+        <main className="flex-1 py-8">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-2xl font-bold mb-4">Item not found</h1>
+            <Button onClick={() => router.push("/")} className="bg-[#328bb8]">
+              Back to Home
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
-  // Calculate total price
-  const totalPrice = (item.price + calculateAdditionalPrice()) * quantity
-
-  // Handle option selection
-  const handleOptionChange = (optionGroup: string, choiceId: string) => {
-    setSelectedOptions({
-      ...selectedOptions,
-      [optionGroup]: choiceId,
-    })
+  const getImageUrl = (path: string) => {
+    if (!path) return "/placeholder.svg?height=400&width=600"
+    if (path.startsWith("http")) return path
+    return `${API_BASE_URL}${path}`
   }
-
-  // Handle add to cart
-  const handleAddToCart = () => {
-    // Check if all required options are selected
-    const allRequiredSelected = item.options
-      .filter((option) => option.required)
-      .every((option) => selectedOptions[option.name])
-
-    if (!allRequiredSelected) {
-      alert("Please select all required options")
-      return
-    }
-
-    // Create selected options text for cart display
-    const optionsText = Object.keys(selectedOptions)
-      .map((optionGroup) => {
-        const option = item.options.find((opt) => opt.name === optionGroup)
-        if (option) {
-          const choice = option.choices.find((c) => c.id === selectedOptions[optionGroup])
-          if (choice) {
-            return `${optionGroup}: ${choice.name}`
-          }
-        }
-        return null
-      })
-      .filter(Boolean)
-      .join(", ")
-
-    // Add item to cart
-    addItem({
-      id: `${item.id}-${Object.values(selectedOptions).join("-")}`,
-      name: `${item.name}${optionsText ? ` (${optionsText})` : ""}`,
-      price: item.price + calculateAdditionalPrice(),
-      quantity,
-      image: item.image,
-      restaurant: item.restaurant,
-    })
-
-    // Open cart
-    toggleCart()
-  }
-
-  // Get related items
-  const relatedItems = item.relatedItems.map((id) => menuItems[id]).filter(Boolean)
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <SearchBar />
-      <main className="flex-1 py-8">
+      <main className="flex-1 py-8 bg-[#F9FAFB]">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="md:w-1/2">
-              <div className="rounded-lg overflow-hidden h-[300px] md:h-[400px] relative">
-                <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
-              </div>
-            </div>
-            <div className="md:w-1/2">
-              <h1 className="text-2xl font-bold">{item.name}</h1>
-              <p className="text-gray-500 mt-1">{item.restaurant}</p>
-              <p className="mt-4">{item.description}</p>
-              <p className="text-xl font-bold mt-4">${item.price.toFixed(2)}</p>
-
-              {/* Options */}
-              <div className="mt-6 space-y-6">
-                {item.options.map((option) => (
-                  <div key={option.name}>
-                    <h3 className="font-medium mb-2">
-                      {option.name} {option.required && <span className="text-red-500">*</span>}
-                    </h3>
-                    <div className="space-y-2">
-                      {option.choices.map((choice) => (
-                        <label key={choice.id} className="flex items-center">
-                          <input
-                            type="radio"
-                            name={option.name}
-                            value={choice.id}
-                            checked={selectedOptions[option.name] === choice.id}
-                            onChange={() => handleOptionChange(option.name, choice.id)}
-                            className="mr-2"
-                            required={option.required}
-                          />
-                          <span>
-                            {choice.name}
-                            {choice.price > 0 && ` (+$${choice.price.toFixed(2)})`}
-                          </span>
-                        </label>
-                      ))}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              <div className="md:w-1/2">
+                <div className="h-[300px] md:h-[500px] relative">
+                  <Image
+                    src={getImageUrl(menuItem.images[0]) || "/placeholder.svg"}
+                    alt={menuItem.menuName}
+                    fill
+                    className="object-cover"
+                  />
+                  {menuItem.discount && menuItem.discount !== "0" && (
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-red-500 text-white px-3 py-1 text-sm font-bold">
+                        {menuItem.discount}% OFF
+                      </Badge>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Quantity */}
-              <div className="mt-6">
-                <h3 className="font-medium mb-2">Quantity</h3>
-                <div className="flex items-center border rounded-md w-fit">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-                  <span className="w-10 text-center">{quantity}</span>
-                  <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => setQuantity(quantity + 1)}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
+                  )}
                 </div>
               </div>
 
-              {/* Total and Add to Cart */}
-              <div className="mt-6">
-                <p className="text-lg font-bold">Total: ${totalPrice.toFixed(2)}</p>
-                <Button className="mt-4 w-full bg-[#328bb8]" onClick={handleAddToCart}>
-                  <ShoppingBag className="mr-2 h-5 w-5" /> Add to Cart
+              <div className="md:w-1/2 p-6 md:p-8">
+                <h1 className="text-2xl md:text-3xl font-bold mb-2">{menuItem.menuName}</h1>
+
+                {menuItem.categoryName && <p className="text-gray-500 mb-4">Category: {menuItem.categoryName}</p>}
+
+                <div className="flex items-center gap-2 mb-4">
+                  <Badge variant="outline" className="bg-[#f8f9fa] text-gray-700">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {menuItem.preparationTime || "20-30 min"}
+                  </Badge>
+
+                  <Badge variant="outline" className="bg-[#f8f9fa] text-gray-700">
+                    <Utensils className="h-3 w-3 mr-1" />
+                    {menuItem.servingSize || "1 serving"}
+                  </Badge>
+
+                  {menuItem.calories && (
+                    <Badge variant="outline" className="bg-[#f8f9fa] text-gray-700">
+                      {menuItem.calories} cal
+                    </Badge>
+                  )}
+                </div>
+
+                <p className="text-gray-700 mb-6">{menuItem.description}</p>
+
+                <div className="flex items-center mb-6">
+                  <div className="text-2xl font-bold text-[#328bb8]">${menuItem.sellPrice.toFixed(2)}</div>
+                  {menuItem.price !== menuItem.sellPrice && (
+                    <div className="ml-2 text-gray-500 line-through">${menuItem.price.toFixed(2)}</div>
+                  )}
+                </div>
+
+                <Tabs defaultValue="details" className="mb-6">
+                  <TabsList className="mb-2">
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="ingredients">Ingredients</TabsTrigger>
+                    <TabsTrigger value="dietary">Dietary Info</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="details" className="text-sm text-gray-600">
+                    <div className="space-y-2">
+                      {menuItem.specialInstructions && (
+                        <div>
+                          <span className="font-medium">Special Instructions:</span> {menuItem.specialInstructions}
+                        </div>
+                      )}
+                      {menuItem.prepInstructions && (
+                        <div>
+                          <span className="font-medium">Preparation Instructions:</span> {menuItem.prepInstructions}
+                        </div>
+                      )}
+                      {menuItem.tags && menuItem.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {menuItem.tags.map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="ingredients" className="text-sm text-gray-600">
+                    {menuItem.ingredients && menuItem.ingredients.length > 0 ? (
+                      <ul className="list-disc pl-5 space-y-1">
+                        {menuItem.ingredients.map((ingredient, index) => (
+                          <li key={index}>{ingredient}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>No ingredient information available.</p>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="dietary" className="text-sm text-gray-600">
+                    {menuItem.dietaryInfo ? (
+                      <div>
+                        {menuItem.dietaryInfo.split("  ").map((item, index) => (
+                          <div key={index} className="mb-1">
+                            • {item.trim()}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p>No dietary information available.</p>
+                    )}
+                  </TabsContent>
+                </Tabs>
+
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium">Quantity</h3>
+                    <div className="flex items-center border rounded-md">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10"
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="w-10 text-center">{quantity}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10"
+                        onClick={() => setQuantity(quantity + 1)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-[#328bb8] h-12 text-lg" onClick={handleAddToCart}>
+                  <ShoppingBag className="mr-2 h-5 w-5" /> Add to Cart - ${(menuItem.sellPrice * quantity).toFixed(2)}
                 </Button>
               </div>
             </div>
           </div>
 
           {/* Related Items */}
-          <div className="mt-12">
-            <h2 className="text-xl font-bold mb-4">You might also like</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {relatedItems.map((relatedItem) => (
-                <div
-                  key={relatedItem.id}
-                  className="bg-white rounded-lg overflow-hidden shadow-sm border cursor-pointer"
-                  onClick={() => router.push(`/menu/${relatedItem.id}`)}
-                >
-                  <div className="h-[160px] relative">
-                    <Image
-                      src={relatedItem.image || "/placeholder.svg"}
-                      alt={relatedItem.name}
-                      fill
-                      className="object-cover"
-                    />
+          {relatedItems.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-xl font-bold mb-4">You might also like</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                {relatedItems.map((item) => (
+                  <div
+                    key={item._id}
+                    className="bg-white rounded-lg overflow-hidden shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => router.push(`/menu/${item._id}`)}
+                  >
+                    <div className="h-[160px] relative">
+                      <Image
+                        src={getImageUrl(item.images[0]) || "/placeholder.svg"}
+                        alt={item.menuName}
+                        fill
+                        className="object-cover"
+                      />
+                      {item.discount && item.discount !== "0" && (
+                        <Badge className="absolute top-2 left-2 bg-red-500">{item.discount}% OFF</Badge>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold">{item.menuName}</h3>
+                      <p className="text-sm text-gray-500 line-clamp-1">{item.description}</p>
+                      <div className="flex justify-between items-center mt-2">
+                        <p className="font-medium">${item.sellPrice.toFixed(2)}</p>
+                        <Button
+                          size="sm"
+                          className="bg-[#328bb8]"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            addItem({
+                              id: item._id,
+                              name: item.menuName,
+                              price: item.sellPrice,
+                              quantity: 1,
+                              image: getImageUrl(item.images[0]),
+                              restaurant: item.restaurantId,
+                            })
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold">{relatedItem.name}</h3>
-                    <p className="text-sm text-gray-500">{relatedItem.restaurant}</p>
-                    <p className="font-medium mt-2">${relatedItem.price.toFixed(2)}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
       <Footer />

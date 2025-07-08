@@ -57,3 +57,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+.categories-card-1{
+  border: 2px solid #6BC83E;
+}
+
+.services-card-1{
+  border: 2px solid #2E64AB;
+}
+.restaurant-card-1{
+  border: 2px solid #6BC83E;
+}

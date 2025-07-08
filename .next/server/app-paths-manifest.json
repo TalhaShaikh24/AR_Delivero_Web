@@ -1,18 +1,5 @@
 {
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/blog/[slug]/page": "app/blog/[slug]/page.js",
-  "/blog/page": "app/blog/page.js",
-  "/categories/[category]/page": "app/categories/[category]/page.js",
-  "/categories/page": "app/categories/page.js",
-  "/checkout/confirmation/page": "app/checkout/confirmation/page.js",
-  "/checkout/page": "app/checkout/page.js",
-  "/delivery/page": "app/delivery/page.js",
-  "/help/page": "app/help/page.js",
-  "/menu/[id]/page": "app/menu/[id]/page.js",
+  "/restaurants/[id]/page": "app/restaurants/[id]/page.js",
   "/page": "app/page.js",
-  "/pickup/page": "app/pickup/page.js",
-  "/restaurants/[slug]/page": "app/restaurants/[slug]/page.js",
-  "/offers/page": "app/offers/page.js",
-  "/restaurants/page": "app/restaurants/page.js"
+  "/checkout/page": "app/checkout/page.js"
 }

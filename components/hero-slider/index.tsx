@@ -9,20 +9,19 @@ import Link from "next/link"
 // Hero slider data
 const heroSlides = [
   {
-    image:
-      "../assets/slide-1.jpg",
+    image: "../assets/slide-1.jpg",
     title: "Delicious Food",
     subtitle: "Delivered to Your Door",
     description: "Experience the finest restaurants in your city",
   },
   {
-    image: "/placeholder.svg?height=400&width=1200",
+    image: "../assets/slide-1.jpg",
     title: "Fresh Ingredients",
     subtitle: "Quality You Can Trust",
     description: "We source only the best ingredients for your meals",
   },
   {
-    image: "/placeholder.svg?height=400&width=1200",
+    image: "../assets/slide-1.jpg",
     title: "Fast Delivery",
     subtitle: "Hot Food at Your Doorstep",
     description: "Our delivery partners ensure your food arrives quickly",

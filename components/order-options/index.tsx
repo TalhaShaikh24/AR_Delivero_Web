@@ -8,7 +8,7 @@ export default function OrderOptions() {
         <h2 className="text-xl font-bold mb-4">What would you like to order?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <Link href="/categories/food" className="block">
-            <div className="bg-white rounded-lg overflow-hidden shadow-sm border">
+            <div className="bg-white rounded-lg overflow-hidden shadow-sm border services-card-1">
               <div className="h-[120px] relative">
                 <Image src="../assets/food2.jpg?height=120&width=300" alt="Food" fill className="object-cover" />
               </div>
@@ -19,7 +19,7 @@ export default function OrderOptions() {
             </div>
           </Link>
           <Link href="/categories/petrol" className="block">
-            <div className="bg-white rounded-lg overflow-hidden shadow-sm border">
+            <div className="bg-white rounded-lg overflow-hidden shadow-sm border services-card-1">
               <div className="h-[120px] relative">
                 <Image src="../assets/petrol.jpg?height=120&width=300" alt="Petrol" fill className="object-cover" />
               </div>
@@ -30,7 +30,7 @@ export default function OrderOptions() {
             </div>
           </Link>
           <Link href="/categories/grocery" className="block">
-            <div className="bg-white rounded-lg overflow-hidden shadow-sm border">
+            <div className="bg-white rounded-lg overflow-hidden shadow-sm border services-card-1">
               <div className="h-[120px] relative">
                 <Image src="../assets/grocery2.jpg?height=120&width=300" alt="Grocery" fill className="object-cover" />
               </div>
@@ -41,7 +41,7 @@ export default function OrderOptions() {
             </div>
           </Link>
           <Link href="/categories/pharmacy" className="block">
-            <div className="bg-white rounded-lg overflow-hidden shadow-sm border">
+            <div className="bg-white rounded-lg overflow-hidden shadow-sm border services-card-1">
               <div className="h-[120px] relative">
                 <Image src="../assets/pharmacy.jpg?height=120&width=300" alt="Pharmacy" fill className="object-cover" />
               </div>

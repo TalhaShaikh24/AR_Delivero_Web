@@ -7,8 +7,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    domains: ['api.ardelivero.com'],
     unoptimized: true,
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

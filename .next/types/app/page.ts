@@ -1,4 +1,4 @@
-// File: E:\My Projects\Asad\ar-delivero-web\app\page.tsx
+// File: C:\Users\hp\Desktop\ardeliveroweb-perfect (2)\app\page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
