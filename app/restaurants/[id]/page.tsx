@@ -15,6 +15,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { useCart } from "@/context/cart-context"
 import { Button } from "@/components/ui/button"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
 
 export default function RestaurantPage() {
   const params = useParams()
@@ -76,7 +78,7 @@ export default function RestaurantPage() {
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        <ModernHeader />
+        <Header />
         <main className="flex-1 pt-20">
           <div className="h-[300px] relative">
             <Skeleton className="h-full w-full" />
@@ -105,7 +107,7 @@ export default function RestaurantPage() {
             </div>
           </div>
         </main>
-        <ModernFooter />
+        <Footer />
       </div>
     )
   }
@@ -113,7 +115,7 @@ export default function RestaurantPage() {
   if (error || !restaurant) {
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        <ModernHeader />
+        <Header />
         <main className="flex-1 py-8 pt-20">
           <div className="container mx-auto px-4">
             <Alert variant="destructive" className="rounded-2xl border-red-200 bg-red-50">
@@ -123,14 +125,14 @@ export default function RestaurantPage() {
             </Alert>
           </div>
         </main>
-        <ModernFooter />
+        <Footer />
       </div>
     )
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <ModernHeader />
+      <Header />
       <main className="flex-1 pt-20">
         {/* Hero Section */}
         <div className="h-[350px] relative overflow-hidden">
@@ -270,7 +272,7 @@ export default function RestaurantPage() {
                               </p>
                               
                               <div className="flex justify-between items-center mb-4">
-                                <span className="font-bold text-xl text-[#328bb8]">${item.sellPrice.toFixed(2)}</span>
+                                <span className="font-bold text-xl text-[#328bb8]">₹{item.sellPrice.toFixed(2)}</span>
                                 <span className="text-sm text-gray-500 flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
                                   {item.preparationTime}
@@ -280,6 +282,7 @@ export default function RestaurantPage() {
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation()
+                                  debugger
                                   const cartItem = {
                                     id: item._id,
                                     name: item.menuName,
@@ -287,6 +290,7 @@ export default function RestaurantPage() {
                                     quantity: 1,
                                     image: restaurantService.getImageUrl(item.images[0]) || "/placeholder.svg",
                                     restaurant: restaurant.establishName,
+                                    restaurantId: restaurant._id, // Added restaurantId
                                   }
                                   addItem(cartItem)
                                 }}
@@ -362,7 +366,7 @@ export default function RestaurantPage() {
           </div>
         </div>
       </main>
-      <ModernFooter />
+      <Footer />
     </div>
   )
 }

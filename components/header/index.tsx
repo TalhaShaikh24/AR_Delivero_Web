@@ -1,16 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { MapPin, Menu, X } from "lucide-react"
 import CartIcon from "@/components/cart/cart-icon"
 import Image from "next/image"
+import { useLocation } from "@/hooks/use-location"
+import { LocationSelector } from "@/components/location-selector"
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { location, requestLocation, formattedLocation } = useLocation()
+
+  // Request location on first load if not already set
+  useEffect(() => {
+    // Only request location if no saved location exists
+    const savedLocation = localStorage.getItem('userLocation')
+    if (!location && !savedLocation) {
+      requestLocation()
+    }
+  }, [location, requestLocation])
 
   return (
-    <header className="bg-gradient-to-r from-[#2a75a8] via-[#328bb8] to-[#3a9dcb] text-white shadow-md relative z-50">
+    <header className="bg-gradient-to-r from-[#2a75a8] via-[#328bb8] to-[#3a9dcb] text-white shadow-md relative z-50 md:sticky md:top-0">
       <div className="container mx-auto flex items-center justify-between p-4">
         {/* Logo Section */}
         <div className="flex items-center">
@@ -30,19 +42,19 @@ export default function Header() {
             </Link>
             <Link
               href="/categories"
-              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors"
+              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors hidden"
             >
               Categories
             </Link>
             <Link
               href="/offers"
-              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors"
+              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors hidden"
             >
               Offers
             </Link>
             <Link
               href="/help"
-              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors"
+              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors hidden"
             >
               Help
             </Link>
@@ -51,10 +63,12 @@ export default function Header() {
 
         {/* Right Section */}
         <div className="flex items-center gap-5">
-          <div className="hidden sm:flex items-center text-sm bg-white/10 px-3 py-1.5 rounded-full">
-            <MapPin className="h-4 w-4 mr-1.5 text-[#6bc83e]" />
-            <span>New York, NY</span>
-          </div>
+          <LocationSelector>
+            <div className="hidden sm:flex items-center text-sm bg-white/10 px-3 py-1.5 rounded-full hover:bg-white/20 transition-colors cursor-pointer">
+              <MapPin className="h-4 w-4 mr-1.5 text-[#6bc83e]" />
+              <span>{formattedLocation}</span>
+            </div>
+          </LocationSelector>
           <CartIcon />
           <Link href="/account">
             <div className="h-9 w-9 rounded-full bg-white text-[#328bb8] flex items-center justify-center shadow-sm hover:shadow-md transition-all hover:scale-105">
@@ -108,10 +122,12 @@ export default function Header() {
             Help
           </Link>
 
-          <div className="sm:hidden flex items-center justify-center text-sm bg-white/10 px-3 py-2 rounded-lg">
-            <MapPin className="h-4 w-4 mr-1.5 text-[#6bc83e]" />
-            <span>New York, NY</span>
-          </div>
+          <LocationSelector>
+            <div className="sm:hidden flex items-center justify-center text-sm bg-white/10 px-3 py-2 rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
+              <MapPin className="h-4 w-4 mr-1.5 text-[#6bc83e]" />
+              <span>{formattedLocation}</span>
+            </div>
+          </LocationSelector>
         </div>
       </div>
     </header>

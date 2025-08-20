@@ -7,11 +7,11 @@ import { Star, Clock, MapPin, Heart, Award, Zap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { Restaurant } from "@/services/restaurant-service"
+import type { RestaurantByLocation } from "@/services/restaurant-service"
 import { API_BASE_URL } from "@/lib/api"
 
 interface FeaturedRestaurantsProps {
-  restaurants?: Restaurant[]
+  restaurants?: RestaurantByLocation[]
   isLoading?: boolean
   error?: string | null
 }
@@ -245,7 +245,7 @@ export default function FeaturedRestaurants({ restaurants, isLoading, error }: F
         </div>
 
         {/* View All Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 hidden">
           <Link href="/restaurants">
             <Button
               size="lg"

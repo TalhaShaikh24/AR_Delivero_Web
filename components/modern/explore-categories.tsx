@@ -261,7 +261,7 @@ export default function ExploreCategories({ categories, isLoading, error }: Expl
         </div>
 
         {/* Enhanced View All Button */}
-        <div className="text-center mt-20">
+        <div className="text-center mt-20 hidden">
           <Link href="/categories">
             <Button
               size="lg"

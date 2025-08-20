@@ -104,7 +104,7 @@ export default function CartSidebar() {
                             <Plus className="h-3 w-3" />
                           </Button>
                         </div>
-                        <span className="font-bold text-lg text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-bold text-lg text-gray-900">₹{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -120,7 +120,7 @@ export default function CartSidebar() {
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2">
                 <span className="text-lg font-bold text-gray-900">Subtotal</span>
-                <span className="text-2xl font-bold text-[#328bb8]">${subtotal.toFixed(2)}</span>
+                <span className="text-2xl font-bold text-[#328bb8]">₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="text-sm text-gray-500 bg-white/80 rounded-xl p-3 border border-gray-100">
                 <div className="flex items-center gap-2">

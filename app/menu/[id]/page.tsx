@@ -172,9 +172,9 @@ export default function MenuItemPage() {
                 <p className="text-gray-700 mb-6">{menuItem.description}</p>
 
                 <div className="flex items-center mb-6">
-                  <div className="text-2xl font-bold text-[#328bb8]">${menuItem.sellPrice.toFixed(2)}</div>
+                  <div className="text-2xl font-bold text-[#328bb8]">₹{menuItem.sellPrice.toFixed(2)}</div>
                   {menuItem.price !== menuItem.sellPrice && (
-                    <div className="ml-2 text-gray-500 line-through">${menuItem.price.toFixed(2)}</div>
+                    <div className="ml-2 text-gray-500 line-through">₹{menuItem.price.toFixed(2)}</div>
                   )}
                 </div>
 
@@ -262,7 +262,7 @@ export default function MenuItemPage() {
                 </div>
 
                 <Button className="w-full bg-[#328bb8] h-12 text-lg" onClick={handleAddToCart}>
-                  <ShoppingBag className="mr-2 h-5 w-5" /> Add to Cart - ${(menuItem.sellPrice * quantity).toFixed(2)}
+                  <ShoppingBag className="mr-2 h-5 w-5" /> Add to Cart - ₹{(menuItem.sellPrice * quantity).toFixed(2)}
                 </Button>
               </div>
             </div>
@@ -294,7 +294,7 @@ export default function MenuItemPage() {
                       <h3 className="font-bold">{item.menuName}</h3>
                       <p className="text-sm text-gray-500 line-clamp-1">{item.description}</p>
                       <div className="flex justify-between items-center mt-2">
-                        <p className="font-medium">${item.sellPrice.toFixed(2)}</p>
+                        <p className="font-medium">₹{item.sellPrice.toFixed(2)}</p>
                         <Button
                           size="sm"
                           className="bg-[#328bb8]"

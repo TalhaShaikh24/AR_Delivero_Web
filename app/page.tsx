@@ -16,6 +16,9 @@ import ChatWidget from "@/components/modern/chat-widget"
 import { CategoryService } from "@/services/category-service"
 import { restaurantService } from "@/services/restaurant-service"
 import { useApi } from "@/hooks/use-api"
+import Header from "@/components/header"
+import { DebugLocation } from "@/components/debug-location"
+import Footer from "@/components/footer"
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -40,7 +43,7 @@ export default function Home() {
     <div
       className={`flex flex-col min-h-screen transition-opacity duration-1000 ${isLoaded ? "opacity-100" : "opacity-0"}`}
     >
-      <ModernHeader />
+      <Header />
       <main className="flex-1 overflow-hidden">
         <ModernHero />
         <ModernSearch />
@@ -51,6 +54,7 @@ export default function Home() {
         <PromotionsBanner />
         <TestimonialsCarousel />
         <ModernCTA />
+        {/* <DebugLocation /> */}
       </main>
       <ModernFooter />
       <ChatWidget />

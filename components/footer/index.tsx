@@ -32,10 +32,16 @@ export default function Footer() {
             <h3 className="text-lg font-bold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/privacy">Privacy Policy</Link>
+                <Link href="/privacy-policy">Privacy Policy</Link>
+              </li>
+              <li>  
+                <Link href="/refund-policy">Refund Policy</Link>
               </li>
               <li>
-                <Link href="/terms">Terms of Service</Link>
+                <Link href="/return-policy-suppliers">Return Policy for Suppliers</Link>
+              </li>
+              <li>
+                <Link href="/terms-and-conditions">Terms and Conditions</Link>
               </li>
             </ul>
           </div>

@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Header from "@/components/header"
@@ -10,9 +9,11 @@ import { useCart } from "@/context/cart-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
-import { CreditCard, MapPin, Truck } from "lucide-react"
+import { CreditCard, MapPin } from "lucide-react"
 import { AuthService } from "@/services/auth-service"
 import AuthModal from "@/components/auth/auth-modal"
+import { Dialog } from "@/components/ui/dialog"
+import { toast } from "@/components/ui/use-toast"
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -32,6 +33,12 @@ export default function CheckoutPage() {
   })
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [paymentType, setPaymentType] = useState("Cash")
+  const [showQrModal, setShowQrModal] = useState(false)
+  const [qrUrl, setQrUrl] = useState("")
+  const [redirectUrl, setRedirectUrl] = useState("")
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false)
+  const [txnId, setTxnId] = useState("")
 
   const deliveryFee = 2.99
   const tax = subtotal * 0.08
@@ -44,6 +51,34 @@ export default function CheckoutPage() {
       setIsAuthModalOpen(true)
     }
   }, [items.length])
+
+  debugger
+  useEffect(() => {
+    debugger
+    console.log("txnId inside useEffect:", txnId);
+    if (!txnId) return;
+    
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`https://qrstuff.me/gateway/check_txn/${txnId}`);
+        const data = await res.json();
+        console.log("Polling txn status:", data);
+  
+        if (data?.txn_status === "success") {
+          clearInterval(interval);
+          toast({ title: "Payment Successful", description: "Your payment was received." });
+          await placeOrder();
+          setShowQrModal(false);
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 3000);
+  
+    return () => clearInterval(interval);
+  }, [txnId]);
+  
+  
 
   if (items.length === 0) {
     return (
@@ -69,14 +104,140 @@ export default function CheckoutPage() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePaymentTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPaymentType(e.target.value)
+  }
+
+  // Helper to generate random txn id
+  function generateRandomId(length = 10) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    let result = ""
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
+  }
+
+  // Mpay UPI QR API call
+  async function handleMpayPayment() {
+    setIsPlacingOrder(true)
+    const url = "https://api.ardelivero.com/api/v1/create-mpay-qr"
+    const headers = { "Content-Type": "application/json", Authorization: "demoServerKey" }
+    const body = {
+      amount: total.toFixed(2),
+      product_name: "AR Delivero Order",
+      customer_name: formData.name,
+      customer_number: formData.phone,
+      customer_email: formData.email,
+    }
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (res.status === 200 && data.status) {
+        const paymentUrl = data.data.payment_url;
+        const txnIdFromUrl = paymentUrl.split('/').pop(); // 👈 Extract txn_id
+      
+        setQrUrl(paymentUrl);
+        setRedirectUrl(data.data.redirect_url);
+        setTxnId(txnIdFromUrl); // 👈 Save extracted txn ID here
+        setShowQrModal(true);
+      }      
+       else {
+        toast({ title: "Payment Failed", description: data.message || "Failed to create Mpay QR code." })
+      }
+    } catch (e) {
+      toast({ title: "Payment Failed", description: "An error occurred while generating the QR code." })
+    } finally {
+      setIsPlacingOrder(false)
+    }
+  }
+
+  // Place order (simulate API call)
+  async function placeOrder() {
+    setIsPlacingOrder(true)
+    try {
+      const user = AuthService.getCurrentUser()
+      const userId = user?._id || ""
+      const restaurantId = items.length > 0 ? items[0].restaurantId || "" : ""
+
+      const cartItems = items.map((i) => ({
+        menuId: i.id,
+        quantity: i.quantity,
+      }))
+
+      const platformFee = 20
+      const deliveryCharge = 10
+      const gst = 8
+      const riderTip = 0
+      const deliveryInstruction = "this is"
+      const deliveryTimes = {
+        min: "0",
+        max: "10",
+      }
+      const orderDate = new Date().toISOString()
+
+      const totalAmount = (subtotal + deliveryCharge + platformFee + gst).toString()
+
+      const payload = {
+        restaurantId,
+        userId,
+        paymentType,
+        subtotal: subtotal.toString(),
+        totalAmount,
+        deliveryAddress: formData.address || "this is test address",
+        deliveryCharge: deliveryCharge.toString(),
+        platformFee: platformFee.toString(),
+        gst: gst.toString(),
+        orderDate,
+        items: JSON.stringify(cartItems),
+        riderTip: riderTip.toString(),
+        deliveryInstruction,
+        deliveryTimes: JSON.stringify(deliveryTimes),
+      }
+
+      const res = await fetch("https://api.ardelivero.com/api/v1/order/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "demoServerKey",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await res.json()
+
+      if (res.ok && data.status) {
+        clearCart()
+        toast({ title: "Order placed!", description: "Your order has been placed successfully." })
+        if (paymentType === "Mpay" && redirectUrl) {
+          window.location.href = redirectUrl
+        } else {
+          router.push("/checkout/confirmation")
+        }
+      } else {
+        toast({ title: "Order failed", description: data.message || "Failed to place order." })
+      }
+    } catch (e) {
+      toast({ title: "Order failed", description: "An error occurred while placing your order." })
+    } finally {
+      setIsPlacingOrder(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (step < 3) {
       setStep(step + 1)
     } else {
-      // Process payment and place order
-      clearCart()
-      router.push("/checkout/confirmation")
+      if (paymentType === "Cash") {
+        await placeOrder()
+      } else if (paymentType === "Mpay") {
+        await handleMpayPayment()
+      }
     }
   }
 
@@ -86,11 +247,14 @@ export default function CheckoutPage() {
     router.replace("/checkout")
   }
 
+ 
+  
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
+    
 
-      {/* Auth Modal */}
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onSuccess={handleAuthSuccess} mode="login" />
 
       {isAuthenticated ? (
@@ -98,7 +262,6 @@ export default function CheckoutPage() {
           <div className="container mx-auto px-4">
             <h1 className="text-2xl font-bold mb-6">Checkout</h1>
 
-            {/* Checkout Steps */}
             <div className="flex justify-center mb-8">
               <div className="flex items-center">
                 <div
@@ -125,6 +288,50 @@ export default function CheckoutPage() {
               <div className="lg:w-2/3">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   {step === 1 && (
+                    <div>
+                      <h2 className="text-xl font-bold mb-4 flex items-center">
+                        <CreditCard className="mr-2 h-5 w-5" /> Choose Payment Method
+                      </h2>
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="flex items-center p-4 border rounded-lg">
+                            <input
+                              type="radio"
+                              name="paymentType"
+                              value="COD"
+                              checked={paymentType === "Cash"}
+                              onChange={handlePaymentTypeChange}
+                              className="mr-3"
+                            />
+                            <div>
+                              <p className="font-medium">Cash on Delivery (Cash)</p>
+                              <p className="text-sm text-gray-500">Pay with cash when your order arrives</p>
+                            </div>
+                          </label>
+                          <label className="flex items-center p-4 border rounded-lg">
+                            <input
+                              type="radio"
+                              name="paymentType"
+                              value="Mpay"
+                              checked={paymentType === "Mpay"}
+                              onChange={handlePaymentTypeChange}
+                              className="mr-3"
+                            />
+                            <div>
+                              <p className="font-medium">Mpay UPI QR</p>
+                              <p className="text-sm text-gray-500">Pay instantly using UPI QR code</p>
+                            </div>
+                          </label>
+                        </div>
+                        <div className="pt-4">
+                          <Button type="submit" className="w-full bg-[#328bb8]">
+                            Continue
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+                  {step === 2 && (
                     <div>
                       <h2 className="text-xl font-bold mb-4 flex items-center">
                         <MapPin className="mr-2 h-5 w-5" /> Delivery Address
@@ -189,133 +396,74 @@ export default function CheckoutPage() {
                             />
                           </div>
                         </div>
-                        <div className="pt-4">
-                          <Button type="submit" className="w-full bg-[#328bb8]">
-                            Continue to Delivery
-                          </Button>
-                        </div>
-                      </form>
-                    </div>
-                  )}
-
-                  {step === 2 && (
-                    <div>
-                      <h2 className="text-xl font-bold mb-4 flex items-center">
-                        <Truck className="mr-2 h-5 w-5" /> Delivery Options
-                      </h2>
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-3">
-                          <label className="flex items-center p-4 border rounded-lg">
-                            <input
-                              type="radio"
-                              name="deliveryOption"
-                              value="standard"
-                              defaultChecked
-                              className="mr-3"
-                            />
-                            <div>
-                              <p className="font-medium">Standard Delivery</p>
-                              <p className="text-sm text-gray-500">Delivery within 30-45 minutes</p>
-                            </div>
-                            <span className="ml-auto">$2.99</span>
-                          </label>
-                          <label className="flex items-center p-4 border rounded-lg">
-                            <input type="radio" name="deliveryOption" value="express" className="mr-3" />
-                            <div>
-                              <p className="font-medium">Express Delivery</p>
-                              <p className="text-sm text-gray-500">Delivery within 15-20 minutes</p>
-                            </div>
-                            <span className="ml-auto">$5.99</span>
-                          </label>
-                          <label className="flex items-center p-4 border rounded-lg">
-                            <input type="radio" name="deliveryOption" value="scheduled" className="mr-3" />
-                            <div>
-                              <p className="font-medium">Scheduled Delivery</p>
-                              <p className="text-sm text-gray-500">Choose your preferred time</p>
-                            </div>
-                            <span className="ml-auto">$3.99</span>
-                          </label>
-                        </div>
                         <div className="pt-4 flex gap-4">
                           <Button type="button" variant="outline" onClick={() => setStep(1)} className="w-1/2">
                             Back
                           </Button>
                           <Button type="submit" className="w-1/2 bg-[#328bb8]">
-                            Continue to Payment
+                            Continue
                           </Button>
                         </div>
                       </form>
                     </div>
                   )}
-
                   {step === 3 && (
                     <div>
                       <h2 className="text-xl font-bold mb-4 flex items-center">
                         <CreditCard className="mr-2 h-5 w-5" /> Payment
                       </h2>
                       <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                          <label htmlFor="cardNumber" className="block text-sm font-medium mb-1">
-                            Card Number
-                          </label>
-                          <Input
-                            id="cardNumber"
-                            name="cardNumber"
-                            placeholder="1234 5678 9012 3456"
-                            value={formData.cardNumber}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="cardName" className="block text-sm font-medium mb-1">
-                            Name on Card
-                          </label>
-                          <Input
-                            id="cardName"
-                            name="cardName"
-                            value={formData.cardName}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label htmlFor="expiry" className="block text-sm font-medium mb-1">
-                              Expiry Date (MM/YY)
-                            </label>
-                            <Input
-                              id="expiry"
-                              name="expiry"
-                              placeholder="MM/YY"
-                              value={formData.expiry}
-                              onChange={handleInputChange}
-                              required
-                            />
+                        {paymentType === "Cash" && (
+                          <div className="pt-4 flex gap-4">
+                            <Button type="button" variant="outline" onClick={() => setStep(2)} className="w-1/2">
+                              Back
+                            </Button>
+                            <Button type="submit" className="w-1/2 bg-[#328bb8]" disabled={isPlacingOrder}>
+                              {isPlacingOrder ? "Placing Order..." : "Place Order"}
+                            </Button>
                           </div>
-                          <div>
-                            <label htmlFor="cvv" className="block text-sm font-medium mb-1">
-                              CVV
-                            </label>
-                            <Input
-                              id="cvv"
-                              name="cvv"
-                              placeholder="123"
-                              value={formData.cvv}
-                              onChange={handleInputChange}
-                              required
-                            />
+                        )}
+                        {paymentType === "Mpay" && (
+                          <div className="pt-4 flex gap-4">
+                            <Button type="button" variant="outline" onClick={() => setStep(2)} className="w-1/2">
+                              Back
+                            </Button>
+                            <Button type="submit" className="w-1/2 bg-[#328bb8]" disabled={isPlacingOrder}>
+                              {isPlacingOrder ? "Processing..." : "Get QR & Pay"}
+                            </Button>
                           </div>
-                        </div>
-                        <div className="pt-4 flex gap-4">
-                          <Button type="button" variant="outline" onClick={() => setStep(2)} className="w-1/2">
-                            Back
-                          </Button>
-                          <Button type="submit" className="w-1/2 bg-[#328bb8]">
-                            Place Order
-                          </Button>
-                        </div>
+                        )}
                       </form>
+                      {paymentType === "Mpay" && showQrModal && (
+                        <Dialog open={showQrModal} onOpenChange={setShowQrModal}>
+                          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-40">
+                            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+                              <h3 className="text-lg font-bold mb-4">Scan to Pay with UPI</h3>
+                              {qrUrl ? (
+                                <iframe src={qrUrl} title="UPI QR" className="w-full h-96 border rounded" />
+                              ) : (
+                                <p>Loading QR...</p>
+                              )}
+                              <div className="mt-4 flex flex-col gap-2">
+                                <Button
+                                  onClick={async () => {
+                                    setShowQrModal(false)
+                                    await placeOrder()
+                                  }}
+                                  className="bg-[#328bb8] w-full"
+                                  disabled={isPlacingOrder}
+                                >
+                                  {isPlacingOrder ? "Processing..." : "I have paid, Place Order"}
+                                </Button>
+                                <Button variant="outline" onClick={() => setShowQrModal(false)} className="w-full">
+                                  Cancel
+                                </Button>
+                                
+                              </div>
+                            </div>
+                          </div>
+                        </Dialog>
+                      )}
                     </div>
                   )}
                 </div>
@@ -339,9 +487,9 @@ export default function CheckoutPage() {
                           <p className="font-medium">{item.name}</p>
                           <div className="flex justify-between text-sm">
                             <span>
-                              {item.quantity} x ${item.price.toFixed(2)}
+                              {item.quantity} x ₹{item.price.toFixed(2)}
                             </span>
-                            <span>${(item.price * item.quantity).toFixed(2)}</span>
+                            <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
@@ -350,19 +498,19 @@ export default function CheckoutPage() {
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>₹{subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Delivery Fee</span>
-                      <span>${deliveryFee.toFixed(2)}</span>
+                      <span>₹{deliveryFee.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${tax.toFixed(2)}</span>
+                      <span>₹{tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg pt-2 border-t">
                       <span>Total</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span>₹{total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -383,3 +531,8 @@ export default function CheckoutPage() {
     </div>
   )
 }
+
+
+
+
+

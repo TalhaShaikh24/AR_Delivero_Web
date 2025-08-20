@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Download, Smartphone, Apple, Play, ArrowRight, Bell, Gift } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,18 @@ import { Input } from "@/components/ui/input"
 export default function ModernCTA() {
   const [email, setEmail] = useState("")
   const [isSubscribed, setIsSubscribed] = useState(false)
+  const [googlePlayLink, setGooglePlayLink] = useState("#") // Default placeholder
+  const [showComingSoon, setShowComingSoon] = useState(false)
+
+useEffect(() => {
+  if (showComingSoon) {
+    const timeout = setTimeout(() => {
+      setShowComingSoon(false)
+    }, 3000)
+    return () => clearTimeout(timeout)
+  }
+}, [showComingSoon])
+
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,6 +32,25 @@ export default function ModernCTA() {
       // Handle newsletter subscription
     }
   }
+
+  // Fetch Google Play link from API
+  useEffect(() => {
+    const fetchGooglePlayLink = async () => {
+      try {
+        const response = await fetch("https://api.ardelivero.com/api/v1/get-link/app-release.apk", {
+          method: "GET",
+        })
+        const data = await response.json()
+        if (data.downloadUrl) {
+          setGooglePlayLink(data.downloadUrl)
+        }
+      } catch (error) {
+        console.error("Error fetching Google Play link:", error)
+      }
+    }
+
+    fetchGooglePlayLink()
+  }, [])
 
   return (
     <section className="py-20 bg-gradient-to-br from-[#328bb8] via-[#2e64ab] to-[#1e4a7a] relative overflow-hidden">
@@ -85,26 +116,31 @@ export default function ModernCTA() {
 
             {/* Download Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                size="lg"
-                className="bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-3"
-              >
-                <Apple className="h-6 w-6" />
-                <div className="text-left">
-                  <div className="text-xs">Download on the</div>
-                  <div className="text-sm font-bold">App Store</div>
-                </div>
-              </Button>
+            <Button
+              size="lg"
+              className="bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-3"
+              onClick={() => setShowComingSoon(true)}
+            >
+              <Apple className="h-6 w-6" />
+              <div className="text-left">
+                <div className="text-xs">Download on the</div>
+                <div className="text-sm font-bold">App Store</div>
+              </div>
+            </Button>
+
 
               <Button
                 size="lg"
                 className="bg-black hover:bg-gray-900 text-white px-6 py-4 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-3"
+                asChild
               >
-                <Play className="h-6 w-6" />
-                <div className="text-left">
-                  <div className="text-xs">Get it on</div>
-                  <div className="text-sm font-bold">Google Play</div>
-                </div>
+                <a href={googlePlayLink} target="_blank" rel="noopener noreferrer">
+                  <Play className="h-6 w-6" />
+                  <div className="text-left">
+                    <div className="text-xs">Get it on</div>
+                    <div className="text-sm font-bold">Google Play</div>
+                  </div>
+                </a>
               </Button>
             </div>
 
@@ -156,6 +192,15 @@ export default function ModernCTA() {
           </div>
         </div>
       </div>
+      {showComingSoon && (
+  <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+    <div className="bg-white text-gray-900 px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 border border-gray-300 animate-fade-in-up">
+      <Apple className="w-5 h-5 text-[#1e4a7a]" />
+      <span className="text-sm font-medium">iOS App is Coming Soon 🚀</span>
+    </div>
+  </div>
+)}
+
     </section>
   )
 }

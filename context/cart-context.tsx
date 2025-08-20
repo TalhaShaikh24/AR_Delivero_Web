@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useEffect } from "react"
 
 export interface CartItem {
   id: string
+  restaurantId: string
   name: string
   price: number
   quantity: number
@@ -53,7 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prevItems) => {
       const existingItem = prevItems.find((i) => i.id === item.id)
       if (existingItem) {
-        return prevItems.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i))
+        return prevItems.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + item.quantity, restaurantId:item.restaurantId } : i))
       } else {
         return [...prevItems, item]
       }

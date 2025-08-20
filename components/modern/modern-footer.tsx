@@ -181,14 +181,23 @@ export default function ModernFooter() {
             </div>
 
             <div className="flex gap-6 text-sm">
-              <Link href="/privacy" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
+              <Link href="/privacy-policy" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
+              <Link href="/terms-and-conditions" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
                 Terms of Service
+              </Link>
+              <Link href="/refund-policy" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
+                Refund Policy
+              </Link>
+              <Link href="/return-policy-suppliers" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
+                Return Policy for Suppliers
               </Link>
               <Link href="/cookies" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
                 Cookie Policy
+              </Link>
+              <Link href="/account-deletion" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
+                Account Deletion
               </Link>
             </div>
           </div>

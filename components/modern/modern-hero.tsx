@@ -27,7 +27,7 @@ const heroSlides = [
     title: "",
     subtitle: "",
     description: "",
-    cta: "Track Order",
+    cta: "Explore Menu",
     accent: "🚀",
   },
 ]
@@ -115,21 +115,21 @@ export default function ModernHero() {
               {heroSlides[currentSlide].cta}
             </Button>
 
-            <Button
+            {/* <Button
               variant="outline"
               size="lg"
               className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105"
             >
               <Play className="w-5 h-5 mr-2" />
               Watch Demo
-            </Button>
+            </Button> */}
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
+          {/* <div className="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
             {[
               { number: "50K+", label: "Happy Customers" },
-              { number: "1000+", label: "Partner Restaurants" },
+              { number: "1000+", label: "Partner Restaurants" },c
               { number: "30min", label: "Avg Delivery Time" },
             ].map((stat, index) => (
               <div key={index} className="text-center">
@@ -137,7 +137,7 @@ export default function ModernHero() {
                 <div className="text-sm text-white/70">{stat.label}</div>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
 
