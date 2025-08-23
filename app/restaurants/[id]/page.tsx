@@ -27,7 +27,7 @@ export default function RestaurantPage() {
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<string>("")
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
-  const { addItem } = useCart()
+  const { addItem,toggleCart } = useCart()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -293,6 +293,7 @@ export default function RestaurantPage() {
                                     restaurantId: restaurant._id, // Added restaurantId
                                   }
                                   addItem(cartItem)
+                                  toggleCart()
                                 }}
                                 className="w-full bg-gradient-to-r from-[#328bb8] to-[#2e64ab] hover:from-[#2e64ab] hover:to-[#1e4a7a] text-white rounded-xl transition-all duration-300 hover:shadow-lg"
                               >

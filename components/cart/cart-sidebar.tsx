@@ -9,11 +9,17 @@ import Link from "next/link"
 export default function CartSidebar() {
   const { items, isCartOpen, toggleCart, removeItem, updateQuantity, subtotal } = useCart()
 
-  if (!isCartOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col">
+    <div 
+      className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm transition-opacity duration-500 ease-in-out ${
+        isCartOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+    >
+      <div 
+        className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col transform transition-transform duration-500 ease-in-out ${
+          isCartOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gradient-to-r from-[#328bb8]/5 to-[#6bc83e]/5">
           <h2 className="text-xl font-bold flex items-center text-gray-900">

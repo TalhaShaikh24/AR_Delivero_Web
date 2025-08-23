@@ -23,8 +23,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   setLoading(true)
 
   try {
-   const response =  await AuthService.login(email, password)
-debugger;
+   const response = await AuthService.login(email, password)
     toast({
       title: "Login successful",
       description: "Welcome back!",
@@ -32,10 +31,10 @@ debugger;
 
     onSuccess()
   } catch (error: any) {
-    debugger;
+    console.error('Login error:', error)
     toast({
       title: "Login failed",
-      description: error?.response?.data?.error?.message || error.message || "An error occurred during login",
+      description: error.message || "An error occurred during login",
       variant: "destructive",
     })
   } finally {

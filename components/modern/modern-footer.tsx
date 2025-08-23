@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Youtube, ArrowRight, Heart } from "lucide-react"
+import { MapPin, Phone, Mail, Facebook, Linkedin, Instagram, Youtube, ArrowRight, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -33,8 +33,8 @@ export default function ModernFooter() {
             <Link href="/" className="flex items-center gap-3">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#328bb8] to-[#6bc83e] rounded-xl blur-lg opacity-30"></div>
-                <div className="relative bg-white p-2 rounded-xl">
-                  <Image src="../../assets/logo.png" alt="AR Delivero" width={40} height={40} />
+                <div className="relative">
+                  <Image src="../../assets/logo.png" alt="AR Delivero" width={60} height={60} />
                 </div>
               </div>
               <div>
@@ -51,10 +51,10 @@ export default function ModernFooter() {
             {/* Social Links */}
             <div className="flex gap-4">
               {[
-                { icon: Facebook, href: "#", color: "hover:text-blue-400" },
-                { icon: Twitter, href: "#", color: "hover:text-sky-400" },
-                { icon: Instagram, href: "#", color: "hover:text-pink-400" },
-                { icon: Youtube, href: "#", color: "hover:text-red-400" },
+                { icon: Facebook, href: "https://www.facebook.com/share/1GWvuNamgY/", color: "hover:text-blue-400" },
+                { icon: Instagram, href: "https://www.instagram.com/ar_delivero?igsh=Y29rb2RuZmdkeGdn", color: "hover:text-pink-400" },
+                { icon: Linkedin, href: "https://www.linkedin.com/company/ar-delivero", color: "hover:text-blue-500" },
+                { icon: MapPin, href: "https://maps.app.goo.gl/5M8G2qMraZ1ynNSc7?g_st=ac", color: "hover:text-green-500" },
               ].map((social, index) => (
                 <Link
                   key={index}
@@ -75,9 +75,7 @@ export default function ModernFooter() {
                 { label: "About Us", href: "/about" },
                 { label: "How It Works", href: "/how-it-works" },
                 { label: "Careers", href: "/careers" },
-                { label: "Press", href: "/press" },
-                { label: "Blog", href: "/blog" },
-                { label: "Help Center", href: "/help" },
+                { label: "Contact us", href: "/help-center" },
               ].map((link, index) => (
                 <li key={index}>
                   <Link
@@ -93,8 +91,8 @@ export default function ModernFooter() {
           </div>
 
           {/* Services */}
-          <div>
-            <h4 className="text-lg font-bold mb-6">Our Services</h4>
+          <div className="">
+            {/* <h4 className="text-lg font-bold mb-6">Our Services</h4>
             <ul className="space-y-3">
               {[
                 { label: "Food Delivery", href: "/categories/food" },
@@ -114,7 +112,28 @@ export default function ModernFooter() {
                   </Link>
                 </li>
               ))}
-            </ul>
+            </ul> */}
+            {/* Newsletter */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+              <h5 className="font-bold mb-3">Newsletter</h5>
+              <p className="text-gray-400 text-sm mb-4">Subscribe for exclusive deals and updates</p>
+              <form onSubmit={handleNewsletterSubmit} className="space-y-3">
+                <Input
+                  type="email"
+                  placeholder="Your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20"
+                  required
+                />
+                <Button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-[#328bb8] to-[#6bc83e] hover:from-[#2e64ab] hover:to-[#5ab32e] text-white"
+                >
+                  Subscribe
+                </Button>
+              </form>
+            </div>
           </div>
 
           {/* Contact & Newsletter */}
@@ -144,27 +163,7 @@ export default function ModernFooter() {
               </div>
             </div>
 
-            {/* Newsletter */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-              <h5 className="font-bold mb-3">Newsletter</h5>
-              <p className="text-gray-400 text-sm mb-4">Subscribe for exclusive deals and updates</p>
-              <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-                <Input
-                  type="email"
-                  placeholder="Your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:bg-white/20"
-                  required
-                />
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-[#328bb8] to-[#6bc83e] hover:from-[#2e64ab] hover:to-[#5ab32e] text-white"
-                >
-                  Subscribe
-                </Button>
-              </form>
-            </div>
+            
           </div>
         </div>
 
@@ -172,7 +171,7 @@ export default function ModernFooter() {
         <div className="border-t border-white/10 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex flex-col md:flex-row items-center gap-4 text-gray-400 text-sm">
-              <p>© 2024 AR Delivero. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} AR Delivero. All rights reserved.</p>
               <div className="flex items-center gap-1">
                 <span>Made with</span>
                 <Heart className="h-4 w-4 text-red-500 fill-red-500" />

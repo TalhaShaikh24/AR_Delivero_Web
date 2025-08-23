@@ -23,6 +23,14 @@ export default function CategoryPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]) // Ensures restaurants is always an array
   const [category, setCategory] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [categoryName1, setCategoryName1] = useState<string | null>(null)
+
+  useEffect(() => {
+    const state = history.state
+    if (state?.name) {
+      setCategoryName1(state.name)
+    }
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,7 +58,7 @@ export default function CategoryPage() {
       fetchData()
     }
   }, [categoryId])
-
+debugger
   const categoryName =
     category?.title || (categoryId ? categoryId.charAt(0).toUpperCase() + categoryId.slice(1) : "Category")
 
@@ -96,7 +104,7 @@ export default function CategoryPage() {
       <SearchBar />
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold mb-6">{categoryName} Restaurants</h1>
+          <h1 className="text-2xl font-bold mb-6">{categoryName1} Restaurants</h1>
 
           {error && (
             <Alert variant="destructive" className="mb-6">

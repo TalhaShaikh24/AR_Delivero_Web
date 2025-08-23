@@ -5,6 +5,8 @@ import { CartProvider } from "@/context/cart-context"
 import CartSidebar from "@/components/cart/cart-sidebar"
 import { LocationPermission } from "@/components/location-permission"
 import type { ReactNode } from "react"
+import { Toaster } from "@/components/ui/toaster"
+import { Icon, icons } from "lucide-react"
 
 interface RootLayoutProps {
   children: ReactNode
@@ -16,6 +18,9 @@ export const metadata = {
   title: "AR Delivero - Food Delivery Service",
   description: "Your one-stop solution for food, groceries, petrol, and pharmacy needs.",
   generator: "v0.dev",
+  icons:{
+    icon:"./ar-favicon.png"
+  }
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
@@ -34,6 +39,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             {children}
             <CartSidebar />
             <LocationPermission />
+            <Toaster />
           </CartProvider>
         </ThemeProvider>
       </body>

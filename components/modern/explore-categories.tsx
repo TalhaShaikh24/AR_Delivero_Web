@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Category } from "@/lib/types/category"
+import { useRouter } from 'next/navigation'
 
 interface ExploreCategoriesProps {
   categories?: Category[]
@@ -87,6 +88,9 @@ const fallbackCategories = [
 export default function ExploreCategories({ categories, isLoading, error }: ExploreCategoriesProps) {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
 
+  // Inside the component
+const router = useRouter()
+
   const displayCategories =
     !isLoading && !error && categories?.length
       ? categories.map((cat, index) => ({
@@ -164,12 +168,16 @@ export default function ExploreCategories({ categories, isLoading, error }: Expl
         {/* Enhanced Categories Grid with Better Image Integration */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {displayCategories.map((category, index) => (
-            <Link
-              href={`/categories/${category._id}`}
-              key={category._id}
-              className="block group"
-              onMouseEnter={() => setHoveredCategory(category._id)}
-              onMouseLeave={() => setHoveredCategory(null)}
+            <div
+            key={category._id}
+            className="block group cursor-pointer"
+            onClick={() => {
+              router.push(`/categories/${category._id}`)
+              // Inject state using history API
+              history.replaceState({ name: category.title }, "")
+            }}
+            onMouseEnter={() => setHoveredCategory(category._id)}
+            onMouseLeave={() => setHoveredCategory(null)}
             >
               <div className="relative h-[420px] rounded-3xl overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-all duration-700 hover:-translate-y-4 hover:rotate-1 border border-gray-100 group">
                 {/* Popular Badge */}
@@ -256,7 +264,7 @@ export default function ExploreCategories({ categories, isLoading, error }: Expl
                   className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 bg-gradient-to-br ${category.color || "from-gray-400 to-gray-600"} blur-xl -z-10`}
                 ></div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
 

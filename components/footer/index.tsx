@@ -1,11 +1,14 @@
 import Link from "next/link"
-
+import Image from "next/image"
 export default function Footer() {
   return (
     <footer className="bg-[#328bb8] text-white pt-10 pb-6">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
+          <div className="relative">
+                  <Image src="../../assets/logo.png" alt="AR Delivero" width={60} height={60} />
+                </div>
             <h3 className="text-lg font-bold mb-4">AR Delivero</h3>
             <p className="text-sm text-gray-200">
               Your one-stop solution for food, groceries, petrol, and pharmacy needs.
@@ -18,13 +21,13 @@ export default function Footer() {
                 <Link href="/about">About Us</Link>
               </li>
               <li>
-                <Link href="/contact">Contact</Link>
+                <Link href="/help-center">Help Center</Link>
               </li>
               <li>
                 <Link href="/careers">Careers</Link>
               </li>
               <li>
-                <Link href="/blog">Blog</Link>
+                <Link href="#">Blog</Link>
               </li>
             </ul>
           </div>
@@ -43,6 +46,9 @@ export default function Footer() {
               <li>
                 <Link href="/terms-and-conditions">Terms and Conditions</Link>
               </li>
+              <li>
+                <Link href="/shipment-policy">Shipment Policy</Link>
+              </li>
             </ul>
           </div>
           <div>
@@ -55,7 +61,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-blue-400 pt-6">
-          <p className="text-sm text-center">© 2023 AR Delivero. All rights reserved.</p>
+          <p className="text-sm text-center">© {new Date().getFullYear()} AR Delivero. All rights reserved.</p>
         </div>
       </div>
     </footer>
