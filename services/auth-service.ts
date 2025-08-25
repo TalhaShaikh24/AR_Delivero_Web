@@ -338,6 +338,47 @@ export const AuthService = {
   },
 
   /**
+   * Update user address
+   */
+  updateAddress: async (
+    userId: string,
+    addressData: {
+      doorNumber: string;
+      street: string;
+      city: string;
+      state: string;
+      country: string;
+      postalCode: string;
+    }
+  ): Promise<{ message: string }> => {
+    try {
+      const response = await api.put<{ message: string }>(
+        `api/v1/user/updateAddress/${userId}`,
+        addressData,
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Failed to update address:", error);
+      throw new Error(error.data?.message || error.message || "Failed to update address");
+    }
+  },
+
+  /**
+   * Get user addresses
+   */
+  getUserAddresses: async (userId: string): Promise<any> => {
+    try {
+      const response = await api.get<any>(
+        `api/v1/user/updateAddress/${userId}`,
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Failed to get user addresses:", error);
+      throw new Error(error.data?.message || error.message || "Failed to get user addresses");
+    }
+  },
+
+  /**
    * Logout user
    */
   logout: (): void => {

@@ -70,6 +70,19 @@ export default function ProfilePage() {
     confirmPassword: "",
   });
 
+  // Address form state
+  const [addressForm, setAddressForm] = useState({
+    doorNumber: "",
+    street: "",
+    city: "",
+    state: "",
+    country: "",
+    postalCode: "",
+  });
+
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [addressLoading, setAddressLoading] = useState(false);
+
   useEffect(() => {
     if (!AuthService.isLoggedIn()) {
       router.push("/login");
@@ -81,6 +94,7 @@ export default function ProfilePage() {
 
     if (user) {
       fetchUserDetails(user._id);
+      fetchUserAddresses(user._id);
     }
 
     setIsLoading(false);
@@ -113,6 +127,25 @@ export default function ProfilePage() {
       });
     } finally {
       setDetailsLoading(false);
+    }
+  };
+
+  const fetchUserAddresses = async (userId: string) => {
+    try {
+      setAddressLoading(true);
+      const response = await AuthService.getUserAddresses(userId);
+      if (response.data) {
+        setAddresses(response.data);
+      }
+    } catch (error: any) {
+      console.error("Failed to fetch addresses:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load addresses",
+        variant: "destructive",
+      });
+    } finally {
+      setAddressLoading(false);
     }
   };
 
@@ -283,6 +316,61 @@ export default function ProfilePage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setAddressForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAddressSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    if (!addressForm.doorNumber.trim() || !addressForm.street.trim() || !addressForm.city.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Door number, street, and city are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAddressLoading(true);
+
+    try {
+      await AuthService.updateAddress(currentUser._id, addressForm);
+
+      toast({
+        title: "Success",
+        description: "Your address has been successfully updated",
+        variant: "success",
+      });
+
+      // Refresh addresses
+      await fetchUserAddresses(currentUser._id);
+
+      // Clear form
+      setAddressForm({
+        doorNumber: "",
+        street: "",
+        city: "",
+        state: "",
+        country: "",
+        postalCode: "",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Address update failed",
+        description: error.message || "Failed to update address",
+        variant: "destructive",
+      });
+    } finally {
+      setAddressLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -500,13 +588,20 @@ export default function ProfilePage() {
           <Card>
             <CardContent className="p-6">
               <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger
                     value="profile"
                     className="flex items-center gap-2"
                   >
                     <Edit className="h-4 w-4" />
                     Update Profile
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="address"
+                    className="flex items-center gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    Address
                   </TabsTrigger>
                   <TabsTrigger
                     value="password"
@@ -581,6 +676,131 @@ export default function ProfilePage() {
                         {profileLoading
                           ? "Updating Profile..."
                           : "Update Profile"}
+                      </Button>
+                    </form>
+                  </div>
+                </TabsContent>
+
+                {/* Address Management Tab */}
+                <TabsContent value="address" className="mt-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">
+                        Manage Addresses
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Add or update your delivery addresses
+                      </p>
+                    </div>
+
+                    {/* Existing Addresses */}
+                    {addresses.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="font-medium mb-3">Saved Addresses</h4>
+                        <div className="space-y-2">
+                          {addresses.map((address, index) => (
+                            <div key={index} className="p-3 border rounded-lg bg-gray-50">
+                              <p className="font-medium">
+                                {address.doorNumber} {address.street}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {address.city}, {address.state} {address.postalCode}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {address.country}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleAddressSubmit} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="doorNumber">Door Number *</Label>
+                          <Input
+                            id="doorNumber"
+                            name="doorNumber"
+                            placeholder="Enter door number"
+                            value={addressForm.doorNumber}
+                            onChange={handleAddressChange}
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="street">Street *</Label>
+                          <Input
+                            id="street"
+                            name="street"
+                            placeholder="Enter street name"
+                            value={addressForm.street}
+                            onChange={handleAddressChange}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="city">City *</Label>
+                          <Input
+                            id="city"
+                            name="city"
+                            placeholder="Enter city"
+                            value={addressForm.city}
+                            onChange={handleAddressChange}
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="state">State</Label>
+                          <Input
+                            id="state"
+                            name="state"
+                            placeholder="Enter state"
+                            value={addressForm.state}
+                            onChange={handleAddressChange}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="country">Country</Label>
+                          <Input
+                            id="country"
+                            name="country"
+                            placeholder="Enter country"
+                            value={addressForm.country}
+                            onChange={handleAddressChange}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="postalCode">Postal Code</Label>
+                          <Input
+                            id="postalCode"
+                            name="postalCode"
+                            placeholder="Enter postal code"
+                            value={addressForm.postalCode}
+                            onChange={handleAddressChange}
+                          />
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <Button
+                        type="submit"
+                        className="w-full bg-[#328bb8] hover:bg-[#2a7ba0]"
+                        disabled={addressLoading}
+                      >
+                        {addressLoading
+                          ? "Updating Address..."
+                          : "Add/Update Address"}
                       </Button>
                     </form>
                   </div>
