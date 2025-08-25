@@ -60,6 +60,9 @@ export function useLocation(): UseLocationReturn {
       const currentLocation = await locationService.getCurrentLocation()
       setLocation(currentLocation)
       locationService.saveLocation(currentLocation)
+      
+      // Auto-save address to database if user is logged in
+      await locationService.autoSaveLocationToDatabase(currentLocation)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get location'
       setError(errorMessage)

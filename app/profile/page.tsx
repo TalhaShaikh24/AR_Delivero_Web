@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { User, Lock, Mail, Phone, Edit, Camera, Upload } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AddressAutocomplete } from "@/components/address-autocomplete";
 
 interface User {
   _id: string;
@@ -78,6 +79,8 @@ export default function ProfilePage() {
     state: "",
     country: "",
     postalCode: "",
+    latitude: 0,
+    longitude: 0,
   });
 
   const [addresses, setAddresses] = useState<any[]>([]);
@@ -326,14 +329,28 @@ export default function ProfilePage() {
     }));
   };
 
+  const handleAddressAutocompleteChange = (addressData: any) => {
+    setAddressForm((prev) => ({
+      ...prev,
+      doorNumber: addressData.doorNumber || prev.doorNumber,
+      street: addressData.street || prev.street,
+      city: addressData.city || prev.city,
+      state: addressData.state || prev.state,
+      country: addressData.country || prev.country,
+      postalCode: addressData.postalCode || prev.postalCode,
+      latitude: addressData.latitude || 0,
+      longitude: addressData.longitude || 0,
+    }));
+  };
+
   const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
 
-    if (!addressForm.doorNumber.trim() || !addressForm.street.trim() || !addressForm.city.trim()) {
+    if (!addressForm.city.trim()) {
       toast({
         title: "Validation Error",
-        description: "Door number, street, and city are required",
+        description: "City is required",
         variant: "destructive",
       });
       return;
@@ -342,7 +359,34 @@ export default function ProfilePage() {
     setAddressLoading(true);
 
     try {
-      await AuthService.updateAddress(currentUser._id, addressForm);
+      // Prepare API request body in the specified format
+      const requestBody = {
+        doorNumber: addressForm.doorNumber,
+        street: addressForm.street,
+        city: addressForm.city,
+        state: addressForm.state,
+        country: addressForm.country,
+        postalCode: addressForm.postalCode,
+        location: [addressForm.longitude, addressForm.latitude]
+      };
+
+      await AuthService.updateAddress(currentUser._id, requestBody);
+
+      // Update location in header (live update)
+      if (addressForm.city && addressForm.state) {
+        const newLocationData = {
+          latitude: addressForm.latitude,
+          longitude: addressForm.longitude,
+          formattedAddress: `${addressForm.doorNumber} ${addressForm.street}, ${addressForm.city}, ${addressForm.state}`.trim(),
+          city: addressForm.city,
+          state: addressForm.state,
+          country: addressForm.country
+        };
+        
+        // Update location in localStorage and trigger header update
+        localStorage.setItem('userLocation', JSON.stringify(newLocationData));
+        window.dispatchEvent(new CustomEvent('locationChanged', { detail: newLocationData }));
+      }
 
       toast({
         title: "Success",
@@ -361,6 +405,8 @@ export default function ProfilePage() {
         state: "",
         country: "",
         postalCode: "",
+        latitude: 0,
+        longitude: 0,
       });
     } catch (error: any) {
       toast({
@@ -716,78 +762,87 @@ export default function ProfilePage() {
                     )}
 
                     <form onSubmit={handleAddressSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="doorNumber">Door Number *</Label>
-                          <Input
-                            id="doorNumber"
-                            name="doorNumber"
-                            placeholder="Enter door number"
-                            value={addressForm.doorNumber}
-                            onChange={handleAddressChange}
-                            required
-                          />
+                      {/* Address Autocomplete */}
+                      <AddressAutocomplete
+                        label="Search Address"
+                        value={addressForm}
+                        onChange={handleAddressAutocompleteChange}
+                        placeholder="Search for your address..."
+                      />
+
+                      {/* Manual Address Fields */}
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="doorNumber">Door Number</Label>
+                            <Input
+                              id="doorNumber"
+                              name="doorNumber"
+                              placeholder="Enter door number"
+                              value={addressForm.doorNumber}
+                              onChange={handleAddressChange}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="street">Street</Label>
+                            <Input
+                              id="street"
+                              name="street"
+                              placeholder="Enter street name"
+                              value={addressForm.street}
+                              onChange={handleAddressChange}
+                            />
+                          </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="street">Street *</Label>
-                          <Input
-                            id="street"
-                            name="street"
-                            placeholder="Enter street name"
-                            value={addressForm.street}
-                            onChange={handleAddressChange}
-                            required
-                          />
-                        </div>
-                      </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="city">City *</Label>
+                            <Input
+                              id="city"
+                              name="city"
+                              placeholder="Enter city"
+                              value={addressForm.city}
+                              onChange={handleAddressChange}
+                              required
+                            />
+                          </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="city">City *</Label>
-                          <Input
-                            id="city"
-                            name="city"
-                            placeholder="Enter city"
-                            value={addressForm.city}
-                            onChange={handleAddressChange}
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="state">State</Label>
-                          <Input
-                            id="state"
-                            name="state"
-                            placeholder="Enter state"
-                            value={addressForm.state}
-                            onChange={handleAddressChange}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="country">Country</Label>
-                          <Input
-                            id="country"
-                            name="country"
-                            placeholder="Enter country"
-                            value={addressForm.country}
-                            onChange={handleAddressChange}
-                          />
+                          <div className="space-y-2">
+                            <Label htmlFor="state">State</Label>
+                            <Input
+                              id="state"
+                              name="state"
+                              placeholder="Enter state"
+                              value={addressForm.state}
+                              onChange={handleAddressChange}
+                            />
+                          </div>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="postalCode">Postal Code</Label>
-                          <Input
-                            id="postalCode"
-                            name="postalCode"
-                            placeholder="Enter postal code"
-                            value={addressForm.postalCode}
-                            onChange={handleAddressChange}
-                          />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="country">Country</Label>
+                            <Input
+                              id="country"
+                              name="country"
+                              placeholder="Enter country"
+                              value={addressForm.country}
+                              onChange={handleAddressChange}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="postalCode">Postal Code</Label>
+                            <Input
+                              id="postalCode"
+                              name="postalCode"
+                              placeholder="Enter postal code"
+                              value={addressForm.postalCode}
+                              onChange={handleAddressChange}
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -800,7 +855,7 @@ export default function ProfilePage() {
                       >
                         {addressLoading
                           ? "Updating Address..."
-                          : "Add/Update Address"}
+                          : "Add Address"}
                       </Button>
                     </form>
                   </div>

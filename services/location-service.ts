@@ -22,8 +22,8 @@ class LocationService {
 
       navigator.geolocation.getCurrentPosition(
         async (position) => {
+          const { latitude, longitude } = position.coords
           try {
-            const { latitude, longitude } = position.coords
             const locationData = await this.reverseGeocode(latitude, longitude)
             resolve(locationData)
           } catch (error) {
@@ -192,6 +192,51 @@ class LocationService {
   clearSavedLocation(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('userLocation')
+    }
+  }
+
+  /**
+   * Auto-save location to database when user allows location access
+   */
+  async autoSaveLocationToDatabase(location: LocationData): Promise<void> {
+    try {
+      // Check if user is logged in
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token')
+        const user = localStorage.getItem('currentUser')
+        
+        if (token && user) {
+          const userData = JSON.parse(user)
+          
+          // Prepare address data for API
+          const addressData = {
+            doorNumber: '', // Will be empty for auto-detected locations
+            street: location.formattedAddress.split(',')[0] || '',
+            city: location.city,
+            state: location.state,
+            country: location.country,
+            postalCode: '',
+            location: [location.longitude, location.latitude]
+          }
+
+          // Save to database via API
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/address/${userData._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(addressData)
+          })
+
+          if (response.ok) {
+            console.log('Location auto-saved to database')
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to auto-save location to database:', error)
+      // Don't throw error as this is a background operation
     }
   }
 

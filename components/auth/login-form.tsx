@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,29 +18,40 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setLoading(true)
+    e.preventDefault()
+    setLoading(true)
 
-  try {
-   const response = await AuthService.login(email, password)
-    toast({
-      title: "Login successful",
-      description: "Welcome back!",
-    })
+    try {
+      const response = await AuthService.login(email, password)
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      })
+      onSuccess()
+    } catch (error: any) {
+      // Handle NUMBERVERIFY error for optional phone verification
+      if (error.response?.status === 400 && error.response?.data?.error?.type === "NUMBERVERIFY") {
+        const responseData = error.response.data
+        if (responseData.status && responseData.data?.isVerifyEmail) {
+          toast({
+            title: "Login successful",
+            description: "Email verified. Phone verification is optional.",
+          })
+          onSuccess()
+          return
+        }
+      }
 
-    onSuccess()
-  } catch (error: any) {
-    console.error('Login error:', error)
-    toast({
-      title: "Login failed",
-      description: error.message || "An error occurred during login",
-      variant: "destructive",
-    })
-  } finally {
-    setLoading(false)
+      console.error('Login error:', error)
+      toast({
+        title: "Login failed",
+        description: error.message || "An error occurred during login",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
-}
-
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-4">

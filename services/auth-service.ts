@@ -136,6 +136,7 @@ export const AuthService = {
    */
   verifyOtp: async (email: string, otp: string): Promise<OtpVerifyResponse> => {
     try {
+      debugger
       const response = await api.post<OtpVerifyResponse>(
         "api/v1/user/otp-verify",
         {
@@ -162,26 +163,12 @@ export const AuthService = {
 
       return response;
     } catch (error: any) {
-      // Check if it's a 400 error with NUMBERVERIFY type (which is acceptable)
-      if (
-        error.response?.status === 400 &&
-        error.response?.data?.error?.type === "NUMBERVERIFY"
-      ) {
-        const responseData = error.response.data as OtpVerifyResponse;
+      debugger
+      // Check if it's a 400 error
+      if (error?.status === 400 ) {
+        const responseData = error.data as OtpVerifyResponse;
 
-        // If we have user data and the status is true, treat it as success
-        if (responseData.data && responseData.status) {
-          const userData = {
-            _id: responseData.data._id,
-            username: responseData.data.username,
-            email: responseData.data.email,
-            role: responseData.data.userType,
-          };
-          localStorage.setItem("user", JSON.stringify(userData));
-          localStorage.setItem("token", `temp_${responseData.data._id}`);
-
-          return responseData;
-        }
+        return responseData;
       }
 
       console.error("Failed to verify OTP:", error);
@@ -369,7 +356,7 @@ export const AuthService = {
   getUserAddresses: async (userId: string): Promise<any> => {
     try {
       const response = await api.get<any>(
-        `api/v1/user/updateAddress/${userId}`,
+        `api/v1/user/userAddresses/${userId}`,
       );
       return response;
     } catch (error: any) {

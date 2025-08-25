@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import LoginForm from "@/components/auth/login-form"
 import RegisterForm from "@/components/auth/register-form"
 import OtpVerificationForm from "@/components/auth/otp-verification-form"
@@ -52,6 +52,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, mode = "login" }
           <OtpVerificationForm
             email={email}
             password={password}
+            isGuest={activeTab === "guest"} // Pass isGuest based on activeTab
             onSuccess={handleVerificationSuccess}
             onBack={handleBackToRegister}
           />

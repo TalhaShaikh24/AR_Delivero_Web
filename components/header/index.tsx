@@ -83,10 +83,10 @@ export default function Header() {
               Home
             </Link>
             <Link
-              href="/categories"
-              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors hidden"
+              href="/checkout/tracking"
+              className="px-4 py-2 rounded-full text-sm font-medium hover:bg-white/20 transition-colors "
             >
-              Categories
+              Track Order
             </Link>
             <Link
               href="/offers"

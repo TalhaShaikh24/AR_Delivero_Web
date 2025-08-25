@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -17,7 +16,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("")
 
   useEffect(() => {
-    // Check if user is already logged in
     if (AuthService.isLoggedIn()) {
       setIsAuthenticated(true)
       router.push("/")
@@ -53,9 +51,7 @@ export default function RegisterPage() {
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
                   <p className="text-gray-600">Sign up to get started</p>
                 </div>
-                
                 <RegisterForm onSuccess={handleRegisterSuccess} />
-                
                 <div className="mt-6 text-center">
                   <p className="text-sm text-gray-600">
                     Already have an account?{" "}
@@ -71,10 +67,10 @@ export default function RegisterPage() {
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h1>
                   <p className="text-gray-600">Enter the OTP sent to {email}</p>
                 </div>
-                
                 <OtpVerificationForm
                   email={email}
                   password="123456"
+                  isGuest={false} // Explicitly set isGuest to false for regular registration
                   onSuccess={handleVerificationSuccess}
                   onBack={handleBackToRegister}
                 />

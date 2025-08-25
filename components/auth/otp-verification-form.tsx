@@ -1,8 +1,8 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,18 +12,19 @@ import { toast } from "@/hooks/use-toast"
 interface OtpVerificationFormProps {
   email: string
   password: string
+  isGuest?: boolean
   onSuccess: () => void
   onBack: () => void
 }
 
-export default function OtpVerificationForm({ email, password, onSuccess, onBack }: OtpVerificationFormProps) {
+export default function OtpVerificationForm({ email, password, isGuest = false, onSuccess, onBack }: OtpVerificationFormProps) {
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [resending, setResending] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(30) // 30 seconds countdown
+  const [timeLeft, setTimeLeft] = useState(120) // 2 minutes
+  const router = useRouter()
 
   useEffect(() => {
-    // Start countdown timer
     if (timeLeft > 0) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1)
@@ -33,55 +34,38 @@ export default function OtpVerificationForm({ email, password, onSuccess, onBack
   }, [timeLeft])
 
   const handleSubmit = async (e: React.FormEvent) => {
+    debugger
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Verify the OTP (this will handle the 400 NUMBERVERIFY case)
+      debugger
       const response = await AuthService.verifyOtp(email, otp)
-      if(response.status){
-          // Then automatically log in the user
-       const response =    await AuthService.login(email, password)
-       debugger;
-      }
-      // Check if verification was successful (even with optional number verification)
-      if (response.status && response.data) {
-        // If number verification is optional and we get NUMBERVERIFY error, still proceed
-        const isNumberVerifyOptional = response.error?.type === "NUMBERVERIFY"
+      
+      if (response.status) {
 
-        if (response.data.isVerifyEmail || isNumberVerifyOptional) {
-          toast({
-            title: "Success!",
-            description: isNumberVerifyOptional
-              ? "Email verified successfully. Phone verification is optional."
-              : "You have been verified and logged in successfully",
-          })
-
-          onSuccess()
-        } else {
-          throw new Error("Email verification failed")
+        if (isGuest) {
+          await AuthService.login(email, password)
+          router.push('/checkout');
         }
+
+
+        toast({
+          title: "Success!",
+          description: "Email verified successfully. Redirecting to login...",
+        })
+        router.push("/login") // Redirect to login page
       } else {
-        throw new Error("Verification failed")
+        toast({
+          title: "Failure!",
+          description: response?.error?.message || "Email verification failed",
+        })
       }
     } catch (error: any) {
-      // Check if it's the acceptable 400 NUMBERVERIFY error
-      if (error.response?.status === 400 && error.response?.data?.error?.type === "NUMBERVERIFY") {
-        const responseData = error.response.data
-
-        if (responseData.status && responseData.data?.isVerifyEmail) {
-          toast({
-            title: "Success!",
-            description: "Email verified successfully. Phone verification is optional.",
-          })
-          onSuccess()
-          return
-        }
-      }
-
+      debugger
       toast({
         title: "Verification failed",
-        description: error.message || "An error occurred during verification",
+        description: error?.data?.error?.message || "An error occurred during verification",
         variant: "destructive",
       })
     } finally {
@@ -97,7 +81,7 @@ export default function OtpVerificationForm({ email, password, onSuccess, onBack
         title: "OTP resent",
         description: "A new OTP has been sent to your email",
       })
-      setTimeLeft(30) // Reset countdown
+      setTimeLeft(120)
     } catch (error: any) {
       toast({
         title: "Failed to resend OTP",

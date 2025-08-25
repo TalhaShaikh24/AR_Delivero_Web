@@ -22,7 +22,7 @@ type Address = {
   city: string;
   state: string;
   country: string;
-  postalCode: string;
+  postalCashe: string;
 };
 
 type CheckoutForm = {
@@ -31,7 +31,7 @@ type CheckoutForm = {
   phone: string;
   address: string;
   city: string;
-  postalCode: string;
+  postalCashe: string;
 };
 
 export default function CheckoutPage() {
@@ -44,11 +44,11 @@ export default function CheckoutPage() {
     phone: "",
     address: "",
     city: "",
-    postalCode: "",
+    postalCashe: "",
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [paymentType, setPaymentType] = useState("COD");
+  const [paymentType, setPaymentType] = useState("Cash");
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrUrl, setQrUrl] = useState("");
   const [redirectUrl, setRedirectUrl] = useState("");
@@ -98,7 +98,16 @@ export default function CheckoutPage() {
       console.error("Failed to fetch user addresses:", error);
     }
   };
-
+  useEffect(() => {
+    if (
+      savedAddresses.length > 0 &&
+      !useNewAddress &&
+      selectedAddressId === ""
+    ) {
+      handleAddressSelection(0); // Select the first address by default
+    }
+  }, [savedAddresses, useNewAddress, selectedAddressId]);
+  
   useEffect(() => {
     if (!txnId) return;
     const interval = setInterval(async () => {
@@ -274,18 +283,18 @@ export default function CheckoutPage() {
     // Handle address selection
     if (step === 2) {
       if (!useNewAddress && selectedAddressId !== "") {
-        const selectedAddress = savedAddresses.find(addr => addr.postalCode === selectedAddressId);
+        const selectedAddress = savedAddresses.find(addr => addr.postalCashe === selectedAddressId);
         if (selectedAddress) {
-          const addressString = `${selectedAddress.doorNumber} ${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.postalCode}`;
+          const addressString = `${selectedAddress.doorNumber} ${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.postalCashe}`;
           setFormData(prev => ({
             ...prev,
             address: addressString,
             city: selectedAddress.city,
-            postalCode: selectedAddress.postalCode,
+            postalCashe: selectedAddress.postalCashe,
           }));
           setValue("address", addressString);
           setValue("city", selectedAddress.city);
-          setValue("postalCode", selectedAddress.postalCode);
+          setValue("postalCashe", selectedAddress.postalCashe);
         }
       } else if (useNewAddress) {
         const valid = await trigger();
@@ -293,7 +302,7 @@ export default function CheckoutPage() {
         setFormData(data);
         setValue("address", data.address);
         setValue("city", data.city);
-        setValue("postalCode", data.postalCode);
+        setValue("postalCashe", data.postalCashe);
       } else {
         toast({
           title: "Address Required",
@@ -309,7 +318,7 @@ export default function CheckoutPage() {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      if (paymentType === "COD") {
+      if (paymentType === "Cash") {
         await placeOrder();
       } else if (paymentType === "Mpay") {
         await handleMpayPayment();
@@ -325,19 +334,19 @@ export default function CheckoutPage() {
   };
 
   const handleAddressSelection = (addressIndex: number) => {
-    setSelectedAddressId(savedAddresses[addressIndex].postalCode);
+    setSelectedAddressId(savedAddresses[addressIndex].postalCashe);
     setUseNewAddress(false);
     const selectedAddress = savedAddresses[addressIndex];
-    const addressString = `${selectedAddress.doorNumber} ${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.postalCode}`;
+    const addressString = `${selectedAddress.doorNumber} ${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.postalCashe}`;
     setFormData(prev => ({
       ...prev,
       address: addressString,
       city: selectedAddress.city,
-      postalCode: selectedAddress.postalCode,
+      postalCashe: selectedAddress.postalCashe,
     }));
     setValue("address", addressString);
     setValue("city", selectedAddress.city);
-    setValue("postalCode", selectedAddress.postalCode);
+    setValue("postalCashe", selectedAddress.postalCashe);
   };
 
   const handleAddNewAddress = () => {
@@ -349,14 +358,14 @@ export default function CheckoutPage() {
       phone: "",
       address: "",
       city: "",
-      postalCode: "",
+      postalCashe: "",
     });
     setValue("name", "");
     setValue("email", "");
     setValue("phone", "");
     setValue("address", "");
     setValue("city", "");
-    setValue("postalCode", "");
+    setValue("postalCashe", "");
   };
 
 
@@ -412,8 +421,8 @@ export default function CheckoutPage() {
                           <input
                             type="radio"
                             name="paymentType"
-                            value="COD"
-                            checked={paymentType === "COD"}
+                            value="Cash"
+                            checked={paymentType === "Cash"}
                             onChange={handlePaymentTypeChange}
                             className="mr-3"
                           />
@@ -480,7 +489,7 @@ export default function CheckoutPage() {
                             onChange={handleAddNewAddress}
                             className="mr-2"
                           />
-                          Add New Address
+                          Deliver to different address
                         </label>
                       </div>
 
@@ -496,7 +505,7 @@ export default function CheckoutPage() {
                               onChange={(e) => handleAddressSelection(parseInt(e.target.value))}
                             >
                               {savedAddresses.map((address, index) => (
-                                <option key={address.postalCode} value={index}>
+                                <option key={address.postalCashe} value={index}>
                                   {address.doorNumber} {address.street}, {address.city}
                                 </option>
                               ))}
@@ -611,14 +620,14 @@ export default function CheckoutPage() {
                                 ZIP
                               </label>
                               <Input
-                                {...register("postalCode", {
+                                {...register("postalCashe", {
                                   required: "ZIP is required",
                                 })}
-                                defaultValue={formData.postalCode}
+                                defaultValue={formData.postalCashe}
                               />
-                              {errors.postalCode && (
+                              {errors.postalCashe && (
                                 <p className="text-red-500 text-sm">
-                                  {errors.postalCode.message}
+                                  {errors.postalCashe.message}
                                 </p>
                               )}
                             </div>
@@ -663,7 +672,7 @@ export default function CheckoutPage() {
                           className="w-1/2 bg-[#328bb8]"
                           disabled={isPlacingOrder}
                         >
-                          {paymentType === "COD"
+                          {paymentType === "Cash"
                             ? isPlacingOrder
                               ? "Placing Order..."
                               : "Place Order"
