@@ -38,7 +38,7 @@ export default function ShipmentPolicy() {
           <li><strong>Express Delivery</strong> (where available): 1 working hour</li>
         </ul>
         <p className="mb-4">
-          <em>Note:</em> Delivery timelines are estimates and may vary due to weather, road conditions, strikes, or other unforeseen circumstances.
+          <em>Note:</em> All the orders are delivered in 1-2 hrs depending on location. Delivery timelines are estimates and may vary due to weather, road conditions, strikes, or other unforeseen circumstances.
         </p>
 
         <h2 className="text-2xl font-semibold mt-8 mb-2">5. Shipping Charges</h2>

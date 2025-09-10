@@ -17,7 +17,7 @@ export default function RefundPolicy() {
         <p className="mb-4">You may request a return or refund if:</p>
         <ul className="list-disc pl-6 mb-4 space-y-1">
           <li><b>Wrong Item Delivered</b> – If the delivered item is different from what was ordered.</li>
-          <li><b>Damaged or Expired Products</b>azionali – If items are physically damaged, spoiled, expired, or nearing expiry (within 24 hours).</li>
+          <li><b>Damaged or Expired Products</b> We don’t provide any replacement or exchange , If the order is damaged, spoiled, expired we will credit the amount in 8 to 10 days in original payment method.</li>
           <li><b>Missing Items</b> – If an item from the confirmed order is missing.</li>
           <li><b>Poor Quality or Stale Products</b> – Especially for bakery or perishable items.</li>
         </ul>
@@ -54,6 +54,7 @@ export default function RefundPolicy() {
         <h2 className="text-2xl font-semibold mt-8 mb-2">6. Refund Methods</h2>
         <p className="mb-4">Approved refunds will be processed via:</p>
         <ul className="list-disc pl-6 mb-4 space-y-1">
+          <li>If refund is approved than it will get credited in the original payment method</li>
           <li>Original payment method (UPI/card/net banking) within 5–7 business days.</li>
           <li>Wallet credit in the app (if selected). Preferred.</li>
         </ul>

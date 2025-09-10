@@ -31,7 +31,7 @@ export default function MenuItemPage() {
       try {
         setLoading(true)
         const item = await MenuService.getMenuById(menuId)
-        debugger;
+       
         setMenuItem(item)
 
         // Fetch related items (same category)

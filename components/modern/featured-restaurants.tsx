@@ -99,7 +99,7 @@ export default function FeaturedRestaurants({ restaurants, isLoading, error }: F
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+    <section id="featured-restaurants"  className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
@@ -116,7 +116,7 @@ export default function FeaturedRestaurants({ restaurants, isLoading, error }: F
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-3 justify-center mb-12">
+        <div className="flex flex-wrap gap-3 justify-center mb-12 hidden">
           {["all", "popular", "new", "nearby", "top-rated"].map((filterOption) => (
             <Button
               key={filterOption}

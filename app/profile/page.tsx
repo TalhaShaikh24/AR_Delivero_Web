@@ -22,6 +22,14 @@ import { toast } from "@/hooks/use-toast";
 import { User, Lock, Mail, Phone, Edit, Camera, Upload } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface User {
   _id: string;
@@ -55,6 +63,14 @@ export default function ProfilePage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // For Number Verification
+  const [showNumberVerification, setShowNumberVerification] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [verifyOtpLoading, setVerifyOtpLoading] = useState(false);
+  const [resendOtpLoading, setResendOtpLoading] = useState(false);
 
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -214,14 +230,18 @@ export default function ProfilePage() {
     setProfileLoading(true);
 
     try {
-      // Call the updated service method that includes image
-      await AuthService.updateProfile(
+      // First call the Additional Details API
+      await AuthService.updateAdditionalDetails(
         currentUser._id,
         profileForm.firstName,
         profileForm.lastName,
         profileForm.number,
-        profileForm.image, // Include image in the update
       );
+
+      // If we have an image to update, call the profile image update API
+      if (profileForm.image && profileForm.image !== userDetails?.image) {
+        await AuthService.updateProfileImage(currentUser._id, profileForm.image);
+      }
 
       toast({
         title: "Success",
@@ -232,6 +252,21 @@ export default function ProfilePage() {
       // Refresh user details to get the updated information
       await fetchUserDetails(currentUser._id);
     } catch (error: any) {
+      // Check if this is a number verification required error (400 with NUMBERVERIFY)
+      if (
+        error.message === "Details updated, number verification required" ||
+        (profileForm.number && !userDetails?.isVerifyNumber)
+      ) {
+        // Show number verification popup
+        setPhoneNumber(profileForm.number);
+        setShowNumberVerification(true);
+        toast({
+          title: "Profile Updated",
+          description: "Please verify your phone number to complete the process",
+        });
+        return;
+      }
+
       toast({
         title: "Update failed",
         description: error.message || "Failed to update profile",
@@ -356,6 +391,17 @@ export default function ProfilePage() {
       return;
     }
 
+    // Check if phone number is provided and not verified, if so, prompt for verification
+    if (
+      profileForm.number &&
+      !userDetails?.isVerifyNumber &&
+      !showNumberVerification
+    ) {
+      setPhoneNumber(profileForm.number);
+      setShowNumberVerification(true);
+      return; // Prevent address update until number is verified
+    }
+
     setAddressLoading(true);
 
     try {
@@ -367,7 +413,7 @@ export default function ProfilePage() {
         state: addressForm.state,
         country: addressForm.country,
         postalCode: addressForm.postalCode,
-        location: [addressForm.longitude, addressForm.latitude]
+        location: [addressForm.longitude, addressForm.latitude],
       };
 
       await AuthService.updateAddress(currentUser._id, requestBody);
@@ -380,12 +426,14 @@ export default function ProfilePage() {
           formattedAddress: `${addressForm.doorNumber} ${addressForm.street}, ${addressForm.city}, ${addressForm.state}`.trim(),
           city: addressForm.city,
           state: addressForm.state,
-          country: addressForm.country
+          country: addressForm.country,
         };
-        
+
         // Update location in localStorage and trigger header update
-        localStorage.setItem('userLocation', JSON.stringify(newLocationData));
-        window.dispatchEvent(new CustomEvent('locationChanged', { detail: newLocationData }));
+        localStorage.setItem("userLocation", JSON.stringify(newLocationData));
+        window.dispatchEvent(
+          new CustomEvent("locationChanged", { detail: newLocationData }),
+        );
       }
 
       toast({
@@ -416,6 +464,91 @@ export default function ProfilePage() {
       });
     } finally {
       setAddressLoading(false);
+    }
+  };
+
+  // Function to send OTP
+  const sendOtpToNumber = async () => {
+    if (!phoneNumber) {
+      toast({
+        title: "Error",
+        description: "Please enter a phone number",
+        variant: "destructive",
+      });
+      return;
+    }
+    setOtpLoading(true);
+    try {
+      await AuthService.sendOtpToNumber(phoneNumber);
+      toast({
+        title: "Success",
+        description: "OTP sent successfully. Please check your phone.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send OTP",
+        variant: "destructive",
+      });
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // Function to verify OTP
+  const verifyOtpCode = async () => {
+    if (!otp || !phoneNumber) {
+      toast({
+        title: "Error",
+        description: "Please enter OTP and ensure phone number is set",
+        variant: "destructive",
+      });
+      return;
+    }
+    setVerifyOtpLoading(true);
+    try {
+      await AuthService.verifyOtpCode(otp, phoneNumber);
+      handleNumberVerificationSuccess(); // Call success handler
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to verify OTP",
+        variant: "destructive",
+      });
+    } finally {
+      setVerifyOtpLoading(false);
+    }
+  };
+
+  // Function to resend OTP
+  const resendOtp = async () => {
+    setResendOtpLoading(true);
+    try {
+      await AuthService.sendOtpToNumber(phoneNumber);
+      toast({
+        title: "Success",
+        description: "OTP resent successfully. Please check your phone.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend OTP",
+        variant: "destructive",
+      });
+    } finally {
+      setResendOtpLoading(false);
+    }
+  };
+
+  const handleNumberVerificationSuccess = () => {
+    setShowNumberVerification(false);
+    toast({
+      title: "Success",
+      description: "Your phone number has been verified successfully",
+    });
+    // Refresh user details to update verification status
+    if (currentUser) {
+      fetchUserDetails(currentUser._id);
     }
   };
 
@@ -583,6 +716,57 @@ export default function ProfilePage() {
                         <p className="text-sm text-gray-500">Phone Number</p>
                         <p className="font-medium">{userDetails.number}</p>
                       </div>
+                      {!userDetails.isVerifyNumber && (
+                        <Dialog
+                          open={showNumberVerification}
+                          onOpenChange={setShowNumberVerification}
+                        >
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setPhoneNumber(userDetails.number!)}
+                            >
+                              Verify
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Verify Phone Number</DialogTitle>
+                              <DialogDescription>
+                                Enter the OTP sent to {userDetails.number}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="otp">OTP</Label>
+                                <Input
+                                  id="otp"
+                                  name="otp"
+                                  value={otp}
+                                  onChange={(e) => setOtp(e.target.value)}
+                                  placeholder="Enter OTP"
+                                />
+                                <Button
+                                  variant="link"
+                                  onClick={resendOtp}
+                                  disabled={resendOtpLoading}
+                                  className="p-0 h-auto"
+                                >
+                                  Resend OTP
+                                </Button>
+                              </div>
+                            </div>
+                            <Button
+                              onClick={verifyOtpCode}
+                              disabled={verifyOtpLoading}
+                              className="w-full"
+                            >
+                              {verifyOtpLoading ? "Verifying..." : "Verify"}
+                            </Button>
+                          </DialogContent>
+                        </Dialog>
+                      )}
                     </div>
                   )}
 
@@ -591,11 +775,13 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm text-gray-500">Email Verified</p>
                       <p
-                        className={`font-medium ${userDetails?.isVerifyEmail ? "text-green-600" : "text-red-600"}`}
+                        className={`font-medium ${
+                          userDetails?.isVerifyEmail
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
                       >
-                        {userDetails?.isVerifyEmail
-                          ? "Verified"
-                          : "Not Verified"}
+                        {userDetails?.isVerifyEmail ? "Verified" : "Not Verified"}
                       </p>
                     </div>
                   </div>
@@ -605,11 +791,13 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm text-gray-500">Phone Verified</p>
                       <p
-                        className={`font-medium ${userDetails?.isVerifyNumber ? "text-green-600" : "text-red-600"}`}
+                        className={`font-medium ${
+                          userDetails?.isVerifyNumber
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
                       >
-                        {userDetails?.isVerifyNumber
-                          ? "Verified"
-                          : "Not Verified"}
+                        {userDetails?.isVerifyNumber ? "Verified" : "Not Verified"}
                       </p>
                     </div>
                   </div>
@@ -619,7 +807,11 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm text-gray-500">Account Status</p>
                       <p
-                        className={`font-medium ${userDetails?.userStatus === "APPROVED" ? "text-green-600" : "text-yellow-600"}`}
+                        className={`font-medium ${
+                          userDetails?.userStatus === "APPROVED"
+                            ? "text-green-600"
+                            : "text-yellow-600"
+                        }`}
                       >
                         {userDetails?.userStatus || "Unknown"}
                       </p>
@@ -699,14 +891,74 @@ export default function ProfilePage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="number">Phone Number</Label>
-                        <Input
-                          id="number"
-                          name="number"
-                          type="tel"
-                          placeholder="+1234567890"
-                          value={profileForm.number}
-                          onChange={handleProfileChange}
-                        />
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="number"
+                            name="number"
+                            type="tel"
+                            placeholder="+1234567890"
+                            value={profileForm.number}
+                            onChange={handleProfileChange}
+                            className={
+                              userDetails?.isVerifyNumber
+                                ? ""
+                                : "border-red-500"
+                            }
+                          />
+                          {!userDetails?.isVerifyNumber && (
+                            <Dialog
+                              open={showNumberVerification}
+                              onOpenChange={setShowNumberVerification}
+                            >
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setPhoneNumber(profileForm.number)
+                                  }
+                                >
+                                  Verify
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                  <DialogTitle>Verify Phone Number</DialogTitle>
+                                  <DialogDescription>
+                                    Enter the OTP sent to {profileForm.number}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="otp">OTP</Label>
+                                    <Input
+                                      id="otp"
+                                      name="otp"
+                                      value={otp}
+                                      onChange={(e) => setOtp(e.target.value)}
+                                      placeholder="Enter OTP"
+                                    />
+                                    <Button
+                                      variant="link"
+                                      onClick={resendOtp}
+                                      disabled={resendOtpLoading}
+                                      className="p-0 h-auto"
+                                    >
+                                      Resend OTP
+                                    </Button>
+                                  </div>
+                                </div>
+                                <Button
+                                  onClick={verifyOtpCode}
+                                  disabled={verifyOtpLoading}
+                                  className="w-full"
+                                >
+                                  {verifyOtpLoading ? "Verifying..." : "Verify"}
+                                </Button>
+                              </DialogContent>
+                            </Dialog>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-500">
                           Include country code (e.g., +1 for US, +91 for India)
                         </p>
@@ -745,7 +997,10 @@ export default function ProfilePage() {
                         <h4 className="font-medium mb-3">Saved Addresses</h4>
                         <div className="space-y-2">
                           {addresses.map((address, index) => (
-                            <div key={index} className="p-3 border rounded-lg bg-gray-50">
+                            <div
+                              key={index}
+                              className="p-3 border rounded-lg bg-gray-50"
+                            >
                               <p className="font-medium">
                                 {address.doorNumber} {address.street}
                               </p>
@@ -853,9 +1108,7 @@ export default function ProfilePage() {
                         className="w-full bg-[#328bb8] hover:bg-[#2a7ba0]"
                         disabled={addressLoading}
                       >
-                        {addressLoading
-                          ? "Updating Address..."
-                          : "Add Address"}
+                        {addressLoading ? "Updating Address..." : "Add Address"}
                       </Button>
                     </form>
                   </div>
@@ -912,9 +1165,7 @@ export default function ProfilePage() {
                         className="w-full bg-[#328bb8] hover:bg-[#2a7ba0]"
                         disabled={passwordLoading}
                       >
-                        {passwordLoading
-                          ? "Changing Password..."
-                          : "Change Password"}
+                        {passwordLoading ? "Changing Password..." : "Change Password"}
                       </Button>
                     </form>
                   </div>

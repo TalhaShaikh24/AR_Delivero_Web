@@ -34,12 +34,12 @@ export default function OtpVerificationForm({ email, password, isGuest = false, 
   }, [timeLeft])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    debugger
+
     e.preventDefault()
     setLoading(true)
 
     try {
-      debugger
+     
       const response = await AuthService.verifyOtp(email, otp)
       
       if (response.status) {
@@ -62,7 +62,7 @@ export default function OtpVerificationForm({ email, password, isGuest = false, 
         })
       }
     } catch (error: any) {
-      debugger
+     
       toast({
         title: "Verification failed",
         description: error?.data?.error?.message || "An error occurred during verification",

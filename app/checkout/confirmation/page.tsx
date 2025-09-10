@@ -18,7 +18,8 @@ export default function ConfirmationPage() {
   useEffect(() => {
     // Get delivery address and payment type from query params or local storage
     const address = searchParams.get("address") || localStorage.getItem("deliveryAddress") || "123 Main St, New York, NY 10001"
-    const payment = searchParams.get("paymentType") || localStorage.getItem("paymentType") || "Cash"
+const payment = searchParams.get("paymentType") || localStorage.getItem("paymentType") || "Cash"
+
     setDeliveryAddress(address)
     setPaymentType(payment)
     

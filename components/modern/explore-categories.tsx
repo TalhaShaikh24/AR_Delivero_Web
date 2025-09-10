@@ -34,7 +34,7 @@ const fallbackCategories = [
     description: "Fresh produce and daily essentials",
     image: "/placeholder.svg?height=300&width=400",
     productCount: 850,
-    icon: "🛒",
+    icon: "🍽️",
     color: "from-green-400 via-emerald-400 to-teal-500",
     accent: "bg-green-500",
     popular: false,
@@ -45,7 +45,7 @@ const fallbackCategories = [
     description: "Convenient fuel delivery service",
     image: "/placeholder.svg?height=300&width=400",
     productCount: 45,
-    icon: "⛽",
+    icon: "🍽️",
     color: "from-blue-400 via-indigo-400 to-purple-500",
     accent: "bg-blue-500",
     popular: false,
@@ -56,7 +56,7 @@ const fallbackCategories = [
     description: "Medicines and health products",
     image: "/placeholder.svg?height=300&width=400",
     productCount: 320,
-    icon: "💊",
+    icon: "🍽️",
     color: "from-purple-400 via-pink-400 to-rose-500",
     accent: "bg-purple-500",
     popular: true,
@@ -67,7 +67,7 @@ const fallbackCategories = [
     description: "Latest gadgets and accessories",
     image: "/placeholder.svg?height=300&width=400",
     productCount: 680,
-    icon: "📱",
+    icon: "🍽️",
     color: "from-cyan-400 via-blue-400 to-indigo-500",
     accent: "bg-cyan-500",
     popular: false,
@@ -78,7 +78,7 @@ const fallbackCategories = [
     description: "Trendy clothes and accessories",
     image: "/placeholder.svg?height=300&width=400",
     productCount: 920,
-    icon: "👗",
+    icon: "🍽️",
     color: "from-pink-400 via-rose-400 to-red-500",
     accent: "bg-pink-500",
     popular: true,
@@ -172,7 +172,7 @@ const router = useRouter()
             key={category._id}
             className="block group cursor-pointer"
             onClick={() => {
-              router.push(`/categories/${category._id}`)
+              router.push(`/menu/category/${category._id}`)
               // Inject state using history API
               history.replaceState({ name: category.title }, "")
             }}

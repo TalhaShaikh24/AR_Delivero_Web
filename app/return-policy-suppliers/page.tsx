@@ -73,8 +73,8 @@ export default function ReturnPolicySuppliers() {
         <h2 className="text-2xl font-semibold mt-8 mb-2">Contact</h2>
         <p className="mb-4">For support or questions regarding returns:</p>
         <ul className="list-disc pl-6 mb-4 space-y-1">
-          <li><b>Email:</b> support@ardelivero.in</li>
-          <li><b>Phone:</b> +91-XXXXXXXXXX</li>
+          <li><b>Email:</b> support@ardelivero.com</li>
+          <li><b>Phone:</b> +91-1955295310</li>
         </ul>
       </main>
       <Footer />

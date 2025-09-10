@@ -37,18 +37,18 @@ export function LocationSelector({ children }: LocationSelectorProps) {
         
         service.getPlacePredictions({
           input: query,
-          types: ['(cities)']
+          types: ['geocode'], // Broader type to include cities, towns, villages, etc.
+          componentRestrictions: { country: 'in' } // Restrict to India
         }, (predictions: any[], status: string) => {
-          console.log('Places API response:', { predictions, status })
-          
+          console.log('Places API response:', { predictions, status });
           if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
-            setSearchResults(predictions)
+            setSearchResults(predictions);
           } else {
-            console.error('Places API error:', status)
-            setSearchResults([])
+            console.error('Places API error:', status);
+            setSearchResults([]);
           }
-          setIsSearching(false)
-        })
+          setIsSearching(false);
+        });
       } else {
         // Fallback: use a simple search with predefined cities
         const indianCities = [

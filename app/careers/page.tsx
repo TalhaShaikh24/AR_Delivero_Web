@@ -189,7 +189,7 @@ export default function CareersPage() {
                 <span className="block text-[#6bc83e]">AR DELIVERO</span>
               </h1>
               <p className="text-xl md:text-2xl text-white/90 mb-8 leading-relaxed">
-                We are more than just a delivery platform — we are a growing family of innovators, problem-solvers, and changemakers
+                We are delivery partners — we are a growing family of innovators, problem-solvers, and changemakers
               </p>
               <div className="flex items-center justify-center gap-2 text-white/80 mb-8">
                 <MapPin className="w-5 h-5" />

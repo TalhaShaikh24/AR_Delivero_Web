@@ -43,6 +43,7 @@
     "cmdk": "latest",
     "date-fns": "4.1.0",
     "embla-carousel-react": "latest",
+    "framer-motion": "^12.23.12",
     "input-otp": "latest",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.454.0",

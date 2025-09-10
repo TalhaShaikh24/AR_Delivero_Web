@@ -24,6 +24,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     setLoading(true)
 
     try {
+     
       const response = await AuthService.register(email, username, password)
       toast({
         title: "Registration successful",
@@ -33,7 +34,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     } catch (error: any) {
       toast({
         title: "Registration failed",
-        description: error.message || "An error occurred during registration",
+        description: error?.data?.error.message || "An error occurred during registration",
         variant: "destructive",
       })
     } finally {

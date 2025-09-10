@@ -40,6 +40,9 @@ export default function ModernSearch() {
   const [showDropdown, setShowDropdown] = useState(false)
   const router = useRouter()
 
+
+
+  
   // Debounced search function
   const fetchCategories = useCallback(
     debounce(async (query: string) => {
@@ -95,13 +98,44 @@ export default function ModernSearch() {
   }, [])
 
   const handleVoiceSearch = () => {
-    setIsListening(!isListening)
-    // Voice search implementation would go here
-  }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+  
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+  
+    if (!isListening) {
+      setIsListening(true);
+      recognition.start();
+  
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchValue(transcript);
+        fetchCategories(transcript);
+        setIsListening(false);
+      };
+  
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+  
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+    }
+  };
+  
 
   const handleCategoryClick = (categoryId: string) => {
     setShowDropdown(false)
-    router.push(`/categories/${categoryId}`)
+    router.push(`/menu/category/${categoryId}`)
   }
 
   const handleSearchSubmit = () => {
@@ -110,6 +144,8 @@ export default function ModernSearch() {
       // You can add navigation or other search logic here
     }
   }
+
+  
 
   return (
     <section className="relative -mt-20 z-30 pb-16">
@@ -195,7 +231,7 @@ export default function ModernSearch() {
           </div>
 
           {/* Popular Searches */}
-          <div className="text-center mt-6">
+          <div className="text-center mt-10 hidden">
             <p className="text-gray-600 text-sm mb-3">Popular searches:</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {searchSuggestions.slice(0, 4).map((suggestion, index) => (

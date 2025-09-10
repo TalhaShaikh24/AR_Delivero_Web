@@ -58,7 +58,7 @@ export default function CategoryPage() {
       fetchData()
     }
   }, [categoryId])
-debugger
+
   const categoryName =
     category?.title || (categoryId ? categoryId.charAt(0).toUpperCase() + categoryId.slice(1) : "Category")
 

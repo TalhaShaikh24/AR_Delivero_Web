@@ -69,6 +69,7 @@ export const AuthService = {
     loginType = "email",
   ): Promise<RegisterResponse> => {
     try {
+      
       const response = await api.post<RegisterResponse>(
         "api/v1/user/register",
         {
@@ -93,18 +94,19 @@ export const AuthService = {
     password: string,
   ): Promise<AuthResponse | any> => {
     try {
+    
       const data = await api.post<AuthResponse>("api/v1/user/user-login", {
         email,
         password,
       });
 
-      localStorage.setItem("user", JSON.stringify(data.data.user));
+      localStorage.setItem("user", JSON.stringify(data.data));
       localStorage.setItem("token", data.data.token);
 
       return { message: "Login successful", data };
     } catch (error: any) {
       // error is actually the object returned from fetchApi with { ok, status, data, message }
-      console.error('Auth service error:', error)
+      console.error("Auth service error:", error);
       if (
         error.status === 400 &&
         error.data?.error?.type === "NUMBERVERIFY" &&
@@ -136,7 +138,6 @@ export const AuthService = {
    */
   verifyOtp: async (email: string, otp: string): Promise<OtpVerifyResponse> => {
     try {
-      debugger
       const response = await api.post<OtpVerifyResponse>(
         "api/v1/user/otp-verify",
         {
@@ -163,9 +164,9 @@ export const AuthService = {
 
       return response;
     } catch (error: any) {
-      debugger
+      
       // Check if it's a 400 error
-      if (error?.status === 400 ) {
+      if (error?.status === 400) {
         const responseData = error.data as OtpVerifyResponse;
 
         return responseData;
@@ -207,8 +208,19 @@ export const AuthService = {
    */
   getCurrentUser: (): User | null => {
     if (typeof window === "undefined") return null;
+    
     const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+
+    if (!userStr || userStr === "undefined" || userStr === "null") {
+      return null;
+    }
+
+    try {
+      return JSON.parse(userStr) as User;
+    } catch (err) {
+      console.error("Invalid JSON in localStorage[user]:", userStr);
+      return null;
+    }
   },
 
   /**
@@ -240,7 +252,7 @@ export const AuthService = {
       return response;
     } catch (error: any) {
       console.error("Failed to update profile:", error);
-      
+
       // Handle NUMBERVERIFY error as success (number verification is optional)
       if (
         error.status === 400 &&
@@ -249,8 +261,10 @@ export const AuthService = {
       ) {
         return { message: "Profile updated successfully" };
       }
-      
-      throw new Error(error.data?.message || error.message || "Failed to update profile");
+
+      throw new Error(
+        error.data?.message || error.message || "Failed to update profile",
+      );
     }
   },
 
@@ -283,9 +297,7 @@ export const AuthService = {
    */
   getUserById: async (userId: string): Promise<any> => {
     try {
-      const response = await api.get<any>(
-        `api/v1/user/userById/${userId}`,
-      );
+      const response = await api.get<any>(`api/v1/user/userById/${userId}`);
       return response;
     } catch (error) {
       console.error("Failed to get user by ID:", error);
@@ -310,7 +322,7 @@ export const AuthService = {
       return response;
     } catch (error: any) {
       console.error("Failed to update profile image:", error);
-      
+
       // Handle NUMBERVERIFY error as success (number verification is optional)
       if (
         error.status === 400 &&
@@ -319,8 +331,12 @@ export const AuthService = {
       ) {
         return { message: "Profile image updated successfully" };
       }
-      
-      throw new Error(error.data?.message || error.message || "Failed to update profile image");
+
+      throw new Error(
+        error.data?.message ||
+          error.message ||
+          "Failed to update profile image",
+      );
     }
   },
 
@@ -336,7 +352,7 @@ export const AuthService = {
       state: string;
       country: string;
       postalCode: string;
-    }
+    },
   ): Promise<{ message: string }> => {
     try {
       const response = await api.put<{ message: string }>(
@@ -346,7 +362,9 @@ export const AuthService = {
       return response;
     } catch (error: any) {
       console.error("Failed to update address:", error);
-      throw new Error(error.data?.message || error.message || "Failed to update address");
+      throw new Error(
+        error.data?.message || error.message || "Failed to update address",
+      );
     }
   },
 
@@ -361,7 +379,99 @@ export const AuthService = {
       return response;
     } catch (error: any) {
       console.error("Failed to get user addresses:", error);
-      throw new Error(error.data?.message || error.message || "Failed to get user addresses");
+      throw new Error(
+        error.data?.message || error.message || "Failed to get user addresses",
+      );
+    }
+  },
+
+  /**
+   * Send OTP to phone number
+   */
+  sendNumberOtp: async (number: string): Promise<{ message: string }> => {
+    try {
+      const response = await api.post<{ message: string }>(
+        "api/v1/user/sentNumberOtp",
+        {
+          number,
+        },
+      );
+      return response;
+    } catch (error) {
+      console.error("Failed to send number OTP:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Verify phone number OTP
+   */
+  verifyNumberOtp: async (
+    otp: string,
+    number: string,
+  ): Promise<{ message: string }> => {
+    try {
+      const response = await api.post<{ message: string }>(
+        "api/v1/user/verifyOtpCode/phone",
+        {
+          otp,
+          number,
+        },
+      );
+      return response;
+    } catch (error) {
+      console.error("Failed to verify number OTP:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Send OTP to phone number (alias for sendNumberOtp for consistency)
+   */
+  sendOtpToNumber: async (number: string): Promise<{ message: string }> => {
+    return AuthService.sendNumberOtp(number);
+  },
+
+  /**
+   * Verify OTP code (alias for verifyNumberOtp for consistency)
+   */
+  verifyOtpCode: async (
+    otp: string,
+    number: string,
+  ): Promise<{ message: string }> => {
+    return AuthService.verifyNumberOtp(otp, number);
+  },
+
+  /**
+   * Update user additional details (including number)
+   */
+  updateAdditionalDetails: async (
+    userId: string,
+    firstName: string,
+    lastName: string,
+    number: string,
+  ): Promise<{ message: string }> => {
+    try {
+      const response = await api.post<{ message: string }>(
+        `api/v1/user/user-additional/${userId}`,
+        {
+          firstName,
+          lastName,
+          number,
+        },
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Failed to update additional details:", error);
+
+      // Handle NUMBERVERIFY error as expected (400 error when isVerifyNumber=false)
+      if (error.status === 400 && error.data?.error?.type === "NUMBERVERIFY") {
+        return { message: "Details updated, number verification required" };
+      }
+
+      throw new Error(
+        error.data?.message || error.message || "Failed to update details",
+      );
     }
   },
 

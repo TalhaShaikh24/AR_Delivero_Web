@@ -51,7 +51,7 @@ export default function Home() {
         <FeaturedRestaurants restaurants={restaurants} isLoading={isRestaurantsLoading} error={restaurantsError} />
         <ExploreCategories categories={categories} isLoading={isCategoriesLoading} error={categoriesError} />
         <HowItWorks />
-        <PromotionsBanner />
+        {/* <PromotionsBanner /> */}
         <TestimonialsCarousel />
         <ModernCTA />
         {/* <DebugLocation /> */}

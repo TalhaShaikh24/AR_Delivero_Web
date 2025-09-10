@@ -49,14 +49,18 @@ export interface MenuItem {
 export interface RestaurantDetail extends Restaurant {
   categories: Array<{
     categoryId: string
-    _id: string
+    _id: string,
+    title: string
+      description: string
+      image: string,
     categoryInfo: {
       _id: string
       title: string
       description: string
       image: string
     }
-    menuItems: MenuItem[]
+    menus: MenuItem[],
+    menuItems: MenuItem[],
   }>
 }
 
@@ -103,12 +107,17 @@ class RestaurantService {
       const response = await api.get<ApiResponse<RestaurantByLocation[]>>(
         `api/v1/restaurant/getByLocation/${latitude}%2C${longitude}`,
       )
-      return response.data?.top_rated_restaurants || []
+  
+      const restaurants = response.data?.top_rated_restaurants || []
+  
+      // Filter by restaurantStatus === "APPROVED"
+      return restaurants.filter(restaurant => restaurant.restaurantStatus === "APPROVED")
     } catch (error) {
       console.error("Error fetching restaurants by location:", error)
       return []
     }
   }
+  
   
 
   getImageUrl(path: string): string {
@@ -151,7 +160,7 @@ class RestaurantService {
   }
 
   formatDistance(distance: number): string {
-    debugger
+    
     if (distance < 1) {
       return `${(distance * 10).toFixed(1)}-${(distance * 10 + 2).toFixed(1)} miles`
     }

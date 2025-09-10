@@ -55,15 +55,16 @@ export function AddressAutocomplete({
         
         service.getPlacePredictions({
           input: query,
-          types: ['address']
+          types: ['geocode'], // Broader type for more inclusive results
+          componentRestrictions: { country: 'in' } // Restrict to India
         }, (predictions: any[], status: string) => {
           if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
-            setSearchResults(predictions)
+            setSearchResults(predictions);
           } else {
-            setSearchResults([])
+            setSearchResults([]);
           }
-          setIsSearching(false)
-        })
+          setIsSearching(false);
+        });
       } else {
         // Fallback without Places API
         setSearchResults([])

@@ -74,7 +74,6 @@ export default function ModernFooter() {
               {[
                 { label: "About Us", href: "/about" },
                 { label: "How It Works", href: "/how-it-works" },
-                { label: "Careers", href: "/careers" },
                 { label: "Contact us", href: "/help-center" },
               ].map((link, index) => (
                 <li key={index}>
@@ -192,7 +191,7 @@ export default function ModernFooter() {
               <Link href="/return-policy-suppliers" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
                 Return Policy for Suppliers
               </Link>
-              <Link href="/cookies" className="text-gray-400 hover:text-[#6bc83e] transition-colors">
+              <Link href="/cookies" className="text-gray-400 hover:text-[#6bc83e] transition-colors hidden">
                 Cookie Policy
               </Link>
               <Link href="/account-deletion" className="text-gray-400 hover:text-[#6bc83e] transition-colors">

@@ -13,7 +13,7 @@ interface TopRestaurantsProps {
 }
 
 export default function TopRestaurants({ restaurants, isLoading, error }: TopRestaurantsProps) {
-  debugger
+ 
   if (error) {
     return (
       <section className="py-8 bg-[#F9FAFB]">

@@ -72,7 +72,7 @@ export const MenuService = {
   
   getMenuById: async (menuId: string): Promise<MenuItem> => {
     try {
-    debugger;
+  
       const response = await api.get<SingleMenuResponse>(`api/v1/menu/getSingleMenu/${menuId}`, {
         headers: {
           authorization: "demoServerKey",

@@ -36,10 +36,11 @@ export default function RestaurantPage() {
         setError(null)
 
         const data = await restaurantService.getRestaurantById(restaurantId)
+        debugger;
         setRestaurant(data)
 
         // Set the first category as active tab
-        if (data && data.categories && data.categories.length > 0) {
+        if (data && data.categories && data?.categories.length > 0) {
           setActiveTab(data.categories[0].categoryId)
         }
 
@@ -191,7 +192,7 @@ export default function RestaurantPage() {
                       value={category.categoryId} 
                       className="flex-grow rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#328bb8] data-[state=active]:to-[#2e64ab] data-[state=active]:text-white transition-all duration-300"
                     >
-                      {category.categoryInfo.title}
+                      {category.title}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -200,12 +201,12 @@ export default function RestaurantPage() {
                   <TabsContent key={category.categoryId} value={category.categoryId} className="mt-8">
                     <div className="mb-8">
                       <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                        {category.categoryInfo.title}
+                        {category.title}
                       </h2>
-                      <p className="text-gray-600">Delicious {category.categoryInfo.title.toLowerCase()} options</p>
+                      <p className="text-gray-600">Delicious {category.title.toLowerCase()} options</p>
                     </div>
 
-                    {category.menuItems.length === 0 ? (
+                    {category.menus.length === 0 ? (
                       <div className="text-center py-12">
                         <div className="p-6 bg-gradient-to-r from-[#328bb8]/10 to-[#6bc83e]/10 rounded-3xl inline-block mb-4">
                           <Zap className="h-12 w-12 text-[#328bb8] mx-auto" />
@@ -214,94 +215,103 @@ export default function RestaurantPage() {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                        {category.menuItems.map((item) => (
-                          <div
-                            key={item._id}
-                            className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100"
-                          >
-                            {/* Image */}
-                            <div className="relative h-48 overflow-hidden">
-                              <Image
-                                src={restaurantService.getImageUrl(item.images[0]) || "/placeholder.svg"}
-                                alt={item.menuName}
-                                fill
-                                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                              
-                              {/* Overlay */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        {category.menus.map((item) => (
+  <div
+    key={item._id}
+    className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200"
+  >
+    {/* Image Section */}
+    <div className="relative h-52 overflow-hidden">
+      <Image
+        src={restaurantService.getImageUrl(item.images[0]) || "/placeholder.svg"}
+        alt={item.menuName}
+        fill
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
 
-                              {/* Badges */}
-                              <div className="absolute top-4 left-4 flex gap-2">
-                                {item.discount && item.discount !== "0" && (
-                                  <Badge className="bg-red-500 text-white border-0">
-                                    {item.discount}% OFF
-                                  </Badge>
-                                )}
-                                <Badge className="bg-[#6bc83e] text-white border-0">
-                                  {item.calories} cal
-                                </Badge>
-                              </div>
+      {/* Badges */}
+      <div className="absolute top-3 left-3 flex gap-2">
+        {item.discount && item.discount !== "0" && (
+          <Badge className="bg-[#328bb8] text-white font-semibold px-3 py-1 rounded-full shadow-sm">
+            {item.discount}% OFF
+          </Badge>
+        )}
+        <Badge className="bg-[#6bc83e] text-white font-semibold px-3 py-1 rounded-full shadow-sm">
+          {item.calories} cal
+        </Badge>
+      </div>
 
-                              {/* Favorite Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  toggleFavorite(item._id)
-                                }}
-                                className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all duration-300 hover:scale-110"
-                              >
-                                <Heart
-                                  className={`h-4 w-4 transition-colors ${
-                                    favorites.has(item._id) ? "text-red-500 fill-red-500" : "text-gray-600"
-                                  }`}
-                                />
-                              </button>
-                            </div>
+      {/* Favorite Button */}
+      <button
+        onClick={(e) => {
+          e.preventDefault()
+          toggleFavorite(item._id)
+        }}
+        className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-md rounded-full hover:bg-white hover:scale-110 transition-all duration-300"
+      >
+        <Heart
+          className={`h-5 w-5 transition-colors ${
+            favorites.has(item._id) ? "text-red-600 fill-red-600" : "text-gray-700"
+          }`}
+        />
+      </button>
+    </div>
 
-                            {/* Content */}
-                            <div className="p-6">
-                              <Link href={`/menu/${item._id}`}>
-                                <h3 className="font-bold text-xl mb-2 group-hover:text-[#328bb8] transition-colors">
-                                  {item.menuName}
-                                </h3>
-                              </Link>
-                              
-                              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                {item.description}
-                              </p>
-                              
-                              <div className="flex justify-between items-center mb-4">
-                                <span className="font-bold text-xl text-[#328bb8]">₹{item.sellPrice.toFixed(2)}</span>
-                                <span className="text-sm text-gray-500 flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {item.preparationTime}
-                                </span>
-                              </div>
+    {/* Content Section */}
+    <div className="p-5 space-y-3">
+      {/* Restaurant Name and Menu Name */}
+      <Link href={`/menu/${item._id}`}>
+        <div className="space-y-1">
+          <div className="inline-block bg-gradient-to-r from-[#328bb8] to-[#6bc83e] text-white text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full shadow-sm">
+            {restaurant.establishName}
+          </div>
+          <h3 className="font-bold text-2xl text-gray-900 group-hover:bg-gradient-to-r group-hover:from-[#328bb8] group-hover:to-[#6bc83e] group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+            {item.menuName}
+          </h3>
+        </div>
+      </Link>
 
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  debugger
-                                  const cartItem = {
-                                    id: item._id,
-                                    name: item.menuName,
-                                    price: item.sellPrice,
-                                    quantity: 1,
-                                    image: restaurantService.getImageUrl(item.images[0]) || "/placeholder.svg",
-                                    restaurant: restaurant.establishName,
-                                    restaurantId: restaurant._id, // Added restaurantId
-                                  }
-                                  addItem(cartItem)
-                                  toggleCart()
-                                }}
-                                className="w-full bg-gradient-to-r from-[#328bb8] to-[#2e64ab] hover:from-[#2e64ab] hover:to-[#1e4a7a] text-white rounded-xl transition-all duration-300 hover:shadow-lg"
-                              >
-                                Add to Cart
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+      {/* Description */}
+      <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+        {item.description}
+      </p>
+
+      {/* Price and Prep Time */}
+      <div className="flex justify-between items-center">
+        <span className="font-bold text-xl text-[#328bb8] bg-clip-text">
+          ₹{item.sellPrice.toFixed(2)}
+        </span>
+        <span className="text-sm text-gray-500 flex items-center gap-1">
+          <Clock className="h-4 w-4 text-[#328bb8]" />
+          {item.preparationTime}
+        </span>
+      </div>
+
+      {/* Add to Cart Button */}
+      <Button
+        onClick={(e) => {
+          e.stopPropagation()
+          const cartItem = {
+            id: item._id,
+            name: item.menuName,
+            price: item.sellPrice,
+            quantity: 1,
+            image: restaurantService.getImageUrl(item.images[0]) || "/placeholder.svg",
+            restaurant: restaurant.establishName,
+            restaurantId: restaurant._id,
+          }
+          addItem(cartItem)
+          toggleCart()
+        }}
+        className="w-full bg-gradient-to-r from-[#328bb8] to-[#2e64ab] hover:from-[#2e64ab] hover:to-[#1e4a7a] text-white font-semibold rounded-full py-3 transition-all duration-300 hover:shadow-lg"
+      >
+        Add to Cart
+      </Button>
+    </div>
+  </div>
+))}
                       </div>
                     )}
                   </TabsContent>

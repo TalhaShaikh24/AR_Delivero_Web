@@ -18,20 +18,20 @@ export default function ServiceCategories() {
       color: "from-orange-400 via-red-400 to-pink-500",
       accent: "bg-orange-500",
       popular: true,
-      link: "/restaurants",
+      link: "#featured-restaurants",
       comingSoon: false,
     },
-    {
-      id: "petrol",
-      title: "Petrol Delivery",
-      description: "Fuel delivery at your doorstep",
-      icon: "/PETROL-01.svg",
-      color: "from-yellow-400 via-orange-400 to-red-500",
-      accent: "bg-yellow-500",
-      popular: false,
-      link: "#",
-      comingSoon: true,
-    },
+    // {
+    //   id: "petrol",
+    //   title: "Petrol Delivery",
+    //   description: "Fuel delivery at your doorstep",
+    //   icon: "/PETROL-01.svg",
+    //   color: "from-yellow-400 via-orange-400 to-red-500",
+    //   accent: "bg-yellow-500",
+    //   popular: false,
+    //   link: "#",
+    //   comingSoon: true,
+    // },
     {
       id: "grocery",
       title: "Grocery",
@@ -43,21 +43,21 @@ export default function ServiceCategories() {
       link: "#",
       comingSoon: true,
     },
-    {
-      id: "pharmacy",
-      title: "Pharmacy",
-      description: "Medicines and health products",
-      icon: "/PHARMACY-01.svg",
-      color: "from-purple-400 via-pink-400 to-rose-500",
-      accent: "bg-purple-500",
-      popular: false,
-      link: "#",
-      comingSoon: true,
-    },
+    // {
+    //   id: "pharmacy",
+    //   title: "Pharmacy",
+    //   description: "Medicines and health products",
+    //   icon: "/PHARMACY-01.svg",
+    //   color: "from-purple-400 via-pink-400 to-rose-500",
+    //   accent: "bg-purple-500",
+    //   popular: false,
+    //   link: "#",
+    //   comingSoon: true,
+    // },
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
+    <section className="pt-0 pb-20 bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
       {/* Enhanced Background Pattern */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-[#6bc83e] to-[#328bb8] rounded-full blur-3xl animate-pulse"></div>

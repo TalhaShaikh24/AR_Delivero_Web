@@ -11,7 +11,7 @@ export default function Footer() {
                 </div>
             <h3 className="text-lg font-bold mb-4">AR Delivero</h3>
             <p className="text-sm text-gray-200">
-              Your one-stop solution for food, groceries, petrol, and pharmacy needs.
+            Your trusted partner for food delivery, groceries, and essential services. We bring convenience to your doorstep with quality and speed.
             </p>
           </div>
           <div>
@@ -23,12 +23,10 @@ export default function Footer() {
               <li>
                 <Link href="/help-center">Help Center</Link>
               </li>
-              <li>
+              <li className="hidden">
                 <Link href="/careers">Careers</Link>
               </li>
-              <li>
-                <Link href="#">Blog</Link>
-              </li>
+              
             </ul>
           </div>
           <div>
